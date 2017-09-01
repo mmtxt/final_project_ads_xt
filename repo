@@ -1,0 +1,14 @@
+project selected:
+Option 1
+A major disaster is currently underway with hurricane Harvey. 
+Use social media data (Twitter, Instagram, Reddit etc.) to identify times and areas that are hardest hit from the hurricane
+Plans to do it:
+search the main word of "hurricane Harvey" and got it main location and the time it sent, also the place that mentioned in the tw,
+count the times the place has been mentioned.
+
+instagrame: get information from the comments
+reddit: get place name at the post? how?
+
+Questions:
+1. how to get the information from the internet through R
+2. can i just let R find and count the place times?
