@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 #project description
 
-A major disaster is currently underway with [hurricane Harvey](https://en.wikipedia.org/wiki/Hurricane_Harvey. Use social media data (Twitter, Instagram, Reddit etc.) to identify times and areas that are hardest hit from the hurricane 
+A major disaster is currently underway with [hurricane Harvey](https://en.wikipedia.org/wiki/Hurricane_Harvey). Use social media data (Twitter, Instagram, Reddit etc.) to identify times and areas that are hardest hit from the hurricane 
 
 #basic data source
 
