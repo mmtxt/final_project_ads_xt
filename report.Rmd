@@ -8,16 +8,24 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-#project description
+# project description
 
+<<<<<<< HEAD
 A major disaster is currently underway with [hurricane Harvey](https://en.wikipedia.org/wiki/Hurricane_Harvey.) Use [twitter](https://twitter.com/) to identify times and areas that are hardest hit from the hurricane 
+=======
+A major disaster is currently underway with [hurricane Harvey](https://en.wikipedia.org/wiki/Hurricane_Harvey). Use social media data (Twitter, Instagram, Reddit etc.) to identify times and areas that are hardest hit from the hurricane 
+>>>>>>> 97b51e03de50dbeb23d502b1953aef8ec8bde773
 
-#basic data source
+# basic data source
 
 * [twitter](https://twitter.com/)
 * [twitterR package](http://geoffjentry.hexdump.org/twitteR.pdf)
 
+<<<<<<< HEAD
 #Things to do:
+=======
+# main place extracted:
+>>>>>>> 97b51e03de50dbeb23d502b1953aef8ec8bde773
 
 1. start with scripting data from twitter. Since I am not familiar with python, I am going to use TwitterR package to help me. The detail instruction is here http://geoffjentry.hexdump.org/twitteR.pdf & https://github.com/geoffjentry/twitteR
 
