@@ -2,3 +2,5 @@
 .Rhistory
 .RData
 .Ruserdata
+.twitter_a_infor.Rmd
+.httr-oauth

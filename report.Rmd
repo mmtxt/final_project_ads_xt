@@ -10,31 +10,69 @@ knitr::opts_chunk$set(echo = TRUE)
 
 #project description
 
-A major disaster is currently underway with [hurricane Harvey](https://en.wikipedia.org/wiki/Hurricane_Harvey. Use social media data (Twitter, Instagram, Reddit etc.) to identify times and areas that are hardest hit from the hurricane 
+A major disaster is currently underway with [hurricane Harvey](https://en.wikipedia.org/wiki/Hurricane_Harvey.) Use [twitter](https://twitter.com/) to identify times and areas that are hardest hit from the hurricane 
 
 #basic data source
 
 * [twitter](https://twitter.com/)
-* [instagrame](https://www.instagram.com/?hl=en)
-* [reddit](https://www.reddit.com/search?q=hurricane+harvey)
+* [twitterR package](http://geoffjentry.hexdump.org/twitteR.pdf)
 
-#main place extracted:
+#Things to do:
 
+1. start with scripting data from twitter. Since I am not familiar with python, I am going to use TwitterR package to help me. The detail instruction is here http://geoffjentry.hexdump.org/twitteR.pdf & https://github.com/geoffjentry/twitteR
 
+2. Follow the instruction, first I need to create a Twitter Aplication:
 
+I create a new application with the name of xtao8 and get the API key, API secreat, Access token and Access secret.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+3. Install twitterR. Since I would like to access Harvey and it mainly start on August 17th at night, I would like to start my search from August 25 and follow until 09/08/2017. 
+If the data set is too big, it would be difficult to analysis. So I would like to pull random sample several times and get useful information from them.
 
-```{r cars}
-summary(cars)
+The code I used:
+
+```{r eval=FALSE}
+#getting the data: install twitterR since install.pacakge("twitterR")is not avialble
+#let me try another one
+install.packages(c("devtools", "rjson", "bit64", "httr"))
+#follow the instruction and restart R
+library(devtools)
+install_github("geoffjentry/twitteR")
+
+library(twitteR)
+setup_twitter_oauth("gLvw86UAzsVGG4lNoBTCttQjg", 
+                    "gbBf9OW1PMz2KXMZx9Wo3neKgXNSpvG3abgt3A3TxcBWxefmjm",
+                    "770639700839333888-foZXS5jtNXc7bWdpNnUR18Gb5fPQSp9",
+                    "n8lL1J7HlAhupOGdOVJFyLcNObxWtyxkffTGAnytyqjY1")
+#selection:
+1
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+
+## getting data:(randomly get)
+
+1. First, I would like to try to pull 10000 sample from the twitter randomly and see how much data can be used.
+I try to start at the day hurrican come, but latter I found that you cannot search the time before 9-1
+
+```{r eval=FALSE}
+#data at 9-7.
+sample_10000<-searchTwitter('#HurricaneHarvey until:2017-9-8', n=10000)
+#convertion to the dataframe
+HH1<-twListToDF(sample_10000)
+
 ```
+I get total 6.2M data in my dataset
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+2. Extract location information
+
+
+3. Exclude the location that is not at in the damage area.
+
+
+
+
+
+
+
+
