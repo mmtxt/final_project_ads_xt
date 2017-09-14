@@ -54,21 +54,35 @@ setup_twitter_oauth("gLvw86UAzsVGG4lNoBTCttQjg",
 ## getting data:(randomly get)
 
 1. First, I would like to try to pull 10000 sample from the twitter randomly and see how much data can be used.
-I try to start at the day hurrican come, but latter I found that you cannot search the time before 9-1
+The day I can go back as early as possible is 9/5, so start from 9/5, I will get 5 days data and change it into data frame.
 
 ```{r eval=FALSE}
-#data at 9-7.
-sample_10000<-searchTwitter('#HurricaneHarvey until:2017-9-8', n=10000)
-#convertion to the dataframe
-HH1<-twListToDF(sample_10000)
-
+#data at 9-4
+sample_9_4<-searchTwitter('#HurricaneHarvey until:2017-9-5', n=10000)
+#data at 9-5
+sample_9_5<-searchTwitter('#HurricaneHarvey until:2017-9-6', n=10000)
+#data at 9-6
+sample_9_6<-searchTwitter('#HurricaneHarvey until:2017-9-7', n=10000)
+#data at 9-7
+sample_9_7<-searchTwitter('#HurricaneHarvey until:2017-9-8', n=10000)
+#data at 9-8
+sample_9_8<-searchTwitter('#HurricaneHarvey until:2017-9-9', n=10000)
+HH9_4<-twListToDF(sample_9_4)
+HH9_5<-twListToDF(sample_9_5)
+HH9_6<-twListToDF(sample_9_6)
+HH9_7<-twListToDF(sample_9_7)
+HH9_8<-twListToDF(sample_9_8)
 ```
-I get total 6.2M data in my dataset
+
 
 2. Extract location information
 
 
 3. Exclude the location that is not at in the damage area.
+
+4. Put location information into GIS
+
+5. Use IDW tool to analysis the data.
 
 
 

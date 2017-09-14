@@ -19,3 +19,20 @@ head(sample_1000)
 sample_10000<-searchTwitter('#HurricaneHarvey until:2017-9-8', n=10000)
 HH1<-twListToDF(sample_10000)
 
+#Load packages
+library(twitteR)
+#data at 9-4
+sample_9_4<-searchTwitter('#HurricaneHarvey until:2017-9-5', n=10000)
+#data at 9-5
+sample_9_5<-searchTwitter('#HurricaneHarvey until:2017-9-6', n=10000)
+#data at 9-6
+sample_9_6<-searchTwitter('#HurricaneHarvey until:2017-9-7', n=10000)
+#data at 9-7
+sample_9_7<-searchTwitter('#HurricaneHarvey until:2017-9-8', n=10000)
+#data at 9-8
+sample_9_8<-searchTwitter('#HurricaneHarvey until:2017-9-9', n=10000)
+HH9_4<-twListToDF(sample_9_4)
+HH9_5<-twListToDF(sample_9_5)
+HH9_6<-twListToDF(sample_9_6)
+HH9_7<-twListToDF(sample_9_7)
+HH9_8<-twListToDF(sample_9_8)
