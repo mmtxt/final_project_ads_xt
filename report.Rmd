@@ -73,16 +73,60 @@ HH9_6<-twListToDF(sample_9_6)
 HH9_7<-twListToDF(sample_9_7)
 HH9_8<-twListToDF(sample_9_8)
 ```
+clear the useless data
+```{r eval=FALSE}
+rm(sample_9_4)
+rm(sample_9_5)
+rm(sample_9_6)
+rm(sample_9_7)
+rm(sample_9_8)
+
+```
+
+2. Delete lines without location information
+
+```{r eval=FALSE}
+#load tidytext and dplyr
+library(tidytext)
+library(dplyr)
+
+#select data that have location information
+
+HH9_4$location[HH9_4$location==""]<-"NA"  
+HH9_4$location<-as.factor(HH9_4$location)
+cHH9_4<-filter(HH9_4,location!="NA")
+  
+
+HH9_5$location[HH9_5$location==""]<-"NA"  
+HH9_5$location<-as.factor(HH9_5$location)
+cHH9_5<-filter(HH9_5,location!="NA")
 
 
-2. Extract location information
+HH9_6$location[HH9_6$location==""]<-"NA"  
+HH9_6$location<-as.factor(HH9_6$location)
+cHH9_6<-filter(HH9_6,location!="NA")
 
 
-3. Exclude the location that is not at in the damage area.
+HH9_7$location[HH9_7$location==""]<-"NA"  
+HH9_7$location<-as.factor(HH9_7$location)
+cHH9_7<-filter(HH9_7,location!="NA")
 
-4. Put location information into GIS
 
-5. Use IDW tool to analysis the data.
+HH9_8$location[HH9_8$location==""]<-"NA"  
+HH9_8$location<-as.factor(HH9_8$location)
+cHH9_8<-filter(HH9_8,location!="NA")
+
+```
+
+3. Delete lines with nonsence location information
+
+4. Count the specific location information
+
+5. Delete unrelated location information
+
+6. Put location information into GIS
+
+7. Use IDW tool to draw the difference over time on map.
 
 
 

@@ -36,3 +36,6 @@ HH9_5<-twListToDF(sample_9_5)
 HH9_6<-twListToDF(sample_9_6)
 HH9_7<-twListToDF(sample_9_7)
 HH9_8<-twListToDF(sample_9_8)
+
+#delete the useless data:
+
