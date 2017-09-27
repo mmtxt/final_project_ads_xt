@@ -117,6 +117,13 @@ HH9_8$location<-as.factor(HH9_8$location)
 cHH9_8<-filter(HH9_8,location!="NA")
 
 ```
+EDA report:
+After first step cleaning, I got 5datasets with location information.
+At the date 9/4, I got `` observations of ` `variables
+
+
+
+
 
 3. Delete lines with nonsence location information
 
