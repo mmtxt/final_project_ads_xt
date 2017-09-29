@@ -86,6 +86,10 @@ rm(sample_9_8)
 2. Delete lines without location information
 
 ```{r eval=FALSE}
+#read in the dataset
+
+
+
 #load tidytext and dplyr
 library(tidytext)
 library(dplyr)
@@ -117,17 +121,18 @@ HH9_8$location<-as.factor(HH9_8$location)
 cHH9_8<-filter(HH9_8,location!="NA")
 
 ```
-EDA report:
+### EDA report:
+
 After first step cleaning, I got 5datasets with location information.
-At the date 9/4, I got `` observations of ` `variables
-At the date 9/5, I got `` observations of ` `variables
-At the date 9/6, I got `` observations of ` `variables
-At the date 9/7, I got `` observations of ` `variables
-At the date 9/8, I got `` observations of ` `variables
+At the date 9/4, I got `dim(cHH9_4)[1]` observations of `dim(cHH9_4)[2]`variables
+At the date 9/5, I got `dim(cHH9_5)[1]` observations of `dim(cHH9_5)[2] `variables
+At the date 9/6, I got `dim(cHH9_6)[1]` observations of `dim(cHH9_6)[2] `variables
+At the date 9/7, I got `dim(cHH9_7)[1]` observations of `dim(cHH9_7)[2] `variables
+At the date 9/8, I got `dim(cHH9_8)[1]` observations of `dim(cHH9_8)[2] `variables
 
 
 
-3. Delete lines with nonsence location information
+3. Basic cleaning of the data
 
 # seperete state and city $devided data into those have states and don't.(9/4 as an example)
 
@@ -150,15 +155,39 @@ y_state<-filter(cHH9_4,state!="USA"
 ```
 
 
-# for those have state information, remain state that have TX
+# basic cleaningn
 
 ```{r eval=FALSE}
 
+#remain those have Tx
+
 y_state_t<-y_state
-state_num<-summary(y_state$state)
-head(state_num)
+state_num<-summary(y_state$state,maxsum = 500)
+
 y_state_t<-filter(y_state_t,state=="TX"|state=="TEXAS")
-summary(y_state_t$city)
+city_c<-summary(y_state_t$city,maxsum = 500)
+name_city<-names(city_c)
+
+#change summary of state and city into data frame
+
+city_ystate<-data.frame(city_c)
+city_ystate$city<-as.factor(name_city)
+
+#clear nonsense data$rename
+city_ystate<-filter(city_ystate,city_c>0)
+vector<-c("number","city")
+citylist<-city_ystate$city
+
+colnames(city_ystate)<-vector
+rownames(city_ystate)<-citylist
+
+#for those without state
+
+
+#bind city together:
+city_total<-city_ystate+city_nstate
+
+
 ```
 
 
@@ -167,11 +196,11 @@ summary(y_state_t$city)
 
 
 
-5. Delete unrelated location information
 
-6. Put location information into GIS
 
-7. Use IDW tool to draw the difference over time on map.
+5. Put location information into GIS
+
+6. Use IDW tool to draw the difference over time on map.
 
 
 

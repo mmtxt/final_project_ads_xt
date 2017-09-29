@@ -1,7 +1,6 @@
 #exlpore location information from the text
 library(stringr)
 library(rebus)
-location1<-str_subset(HH9_4$text,pattern = "at" %R% ANY_CHAR)
 
 #for location, seperate state and city
 library(tidyr)
@@ -25,15 +24,36 @@ y_state<-filter(cHH9_4,state!="USA"
 #remain those have Tx
 
 y_state_t<-y_state
-state_num<-summary(y_state$state)
-head(state_num)
+state_num<-summary(y_state$state,maxsum = 500)
+
 y_state_t<-filter(y_state_t,state=="TX"|state=="TEXAS")
-city_c<-summary(y_state_t$city)
+city_c<-summary(y_state_t$city,maxsum = 500)
+name_city<-names(city_c)
+
+#change summary of state and city into data frame
+
+city_ystate<-data.frame(city_c)
+city_ystate$city<-as.factor(name_city)
+
+#clear nonsense data$rename
+city_ystate<-filter(city_ystate,city_c>0)
+vector<-c("number","city")
+citylist<-city_ystate$city
+
+colnames(city_ystate)<-vector
+rownames(city_ystate)<-citylist
+
+#for those without state
+
+
+#bind city together:
+city_total<-city_ystate+city_nstate
+
+
 
 #plot the location information
 
-
-
+hist(city_ystate$city,city_ystate$number)
 
 
 

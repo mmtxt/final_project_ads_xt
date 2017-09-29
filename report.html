@@ -158,10 +158,10 @@ setup_twitter_oauth(&quot;gLvw86UAzsVGG4lNoBTCttQjg&quot;,
                     &quot;n8lL1J7HlAhupOGdOVJFyLcNObxWtyxkffTGAnytyqjY1&quot;)
 #selection:
 1</code></pre>
-<div id="getting-datarandomly-get" class="section level2">
-<h2>getting <a href="data:(randomly" class="uri">data:(randomly</a> get)</h2>
+<div id="getting-and-cleaning-datarandomly-get" class="section level2">
+<h2>getting and cleaning <a href="data:(randomly" class="uri">data:(randomly</a> get)</h2>
 <ol style="list-style-type: decimal">
-<li>First, I would like to try to pull 10000 sample from the twitter randomly and see how much data can be used. The day I can go back as early as possible is 9/5, so start from 9/5, I will get 5 days data</li>
+<li>First, I would like to try to pull 10000 sample from the twitter randomly and see how much data can be used. The day I can go back as early as possible is 9/5, so start from 9/5, I will get 5 days data and change it into data frame.</li>
 </ol>
 <pre class="r"><code>#data at 9-4
 sample_9_4&lt;-searchTwitter('#HurricaneHarvey until:2017-9-5', n=10000)
@@ -173,20 +173,113 @@ sample_9_6&lt;-searchTwitter('#HurricaneHarvey until:2017-9-7', n=10000)
 sample_9_7&lt;-searchTwitter('#HurricaneHarvey until:2017-9-8', n=10000)
 #data at 9-8
 sample_9_8&lt;-searchTwitter('#HurricaneHarvey until:2017-9-9', n=10000)
-HH1&lt;-twListToDF(sample_9_4)
-HH1&lt;-twListToDF(sample_9_5)
-HH1&lt;-twListToDF(sample_9_6)
-HH1&lt;-twListToDF(sample_9_7)
-HH1&lt;-twListToDF(sample_9_8)</code></pre>
-<p>I get total 6.2M data in everyday dataset</p>
-<p>I am trying to get everyday data for 10000 sample from day 8-25.</p>
+HH9_4&lt;-twListToDF(sample_9_4)
+HH9_5&lt;-twListToDF(sample_9_5)
+HH9_6&lt;-twListToDF(sample_9_6)
+HH9_7&lt;-twListToDF(sample_9_7)
+HH9_8&lt;-twListToDF(sample_9_8)</code></pre>
+<p>clear the useless data</p>
+<pre class="r"><code>rm(sample_9_4)
+rm(sample_9_5)
+rm(sample_9_6)
+rm(sample_9_7)
+rm(sample_9_8)</code></pre>
 <ol start="2" style="list-style-type: decimal">
-<li><p>Extract location information</p></li>
-<li><p>Exclude the location that is not at in the damage area.</p></li>
-<li><p>Put location information into GIS</p></li>
-<li><p>Use IDW tool to analysis the data.</p></li>
+<li>Delete lines without location information</li>
+</ol>
+<pre class="r"><code>#read in the dataset
+
+
+
+#load tidytext and dplyr
+library(tidytext)
+library(dplyr)
+
+#select data that have location information
+
+HH9_4$location[HH9_4$location==&quot;&quot;]&lt;-&quot;NA&quot;  
+HH9_4$location&lt;-as.factor(HH9_4$location)
+cHH9_4&lt;-filter(HH9_4,location!=&quot;NA&quot;)
+  
+
+HH9_5$location[HH9_5$location==&quot;&quot;]&lt;-&quot;NA&quot;  
+HH9_5$location&lt;-as.factor(HH9_5$location)
+cHH9_5&lt;-filter(HH9_5,location!=&quot;NA&quot;)
+
+
+HH9_6$location[HH9_6$location==&quot;&quot;]&lt;-&quot;NA&quot;  
+HH9_6$location&lt;-as.factor(HH9_6$location)
+cHH9_6&lt;-filter(HH9_6,location!=&quot;NA&quot;)
+
+
+HH9_7$location[HH9_7$location==&quot;&quot;]&lt;-&quot;NA&quot;  
+HH9_7$location&lt;-as.factor(HH9_7$location)
+cHH9_7&lt;-filter(HH9_7,location!=&quot;NA&quot;)
+
+
+HH9_8$location[HH9_8$location==&quot;&quot;]&lt;-&quot;NA&quot;  
+HH9_8$location&lt;-as.factor(HH9_8$location)
+cHH9_8&lt;-filter(HH9_8,location!=&quot;NA&quot;)</code></pre>
+<div id="eda-report" class="section level3">
+<h3>EDA report:</h3>
+<p>After first step cleaning, I got 5datasets with location information. At the date 9/4, I got <code>dim(cHH9_4)[1]</code> observations of <code>dim(cHH9_4)[2]</code>variables At the date 9/5, I got <code>dim(cHH9_5)[1]</code> observations of <code>dim(cHH9_5)[2]</code>variables At the date 9/6, I got <code>dim(cHH9_6)[1]</code> observations of <code>dim(cHH9_6)[2]</code>variables At the date 9/7, I got <code>dim(cHH9_7)[1]</code> observations of <code>dim(cHH9_7)[2]</code>variables At the date 9/8, I got <code>dim(cHH9_8)[1]</code> observations of <code>dim(cHH9_8)[2]</code>variables</p>
+<ol start="3" style="list-style-type: decimal">
+<li>Basic cleaning of the data</li>
 </ol>
 </div>
+</div>
+</div>
+<div id="seperete-state-and-city-devided-data-into-those-have-states-and-dont.94-as-an-example" class="section level1">
+<h1>seperete state and city $devided data into those have states and don’t.(9/4 as an example)</h1>
+<pre class="r"><code>cHH9_4&lt;-separate(cHH9_4,location,c(&quot;city&quot;,&quot;state&quot;),sep=&quot;,&quot;)
+
+cHH9_4$state&lt;-toupper(cHH9_4$state)
+cHH9_4$city&lt;-toupper(cHH9_4$city)
+
+cHH9_4$state&lt;-as.factor(str_replace_all(cHH9_4$state,pattern=&quot; &quot;,replacement=&quot;&quot;))
+cHH9_4$city&lt;-as.factor(str_replace_all(cHH9_4$city,pattern=&quot; &quot;,replacement=&quot;&quot;))
+
+cHH9_4$city&lt;-as.factor(str_replace_all(cHH9_4$city,pattern=&quot; &quot;,replacement=&quot;&quot;))
+
+no_state&lt;-filter(cHH9_4,state==&quot;USA&quot;
+                 |is.na(state))
+y_state&lt;-filter(cHH9_4,state!=&quot;USA&quot;
+                 &amp;!is.na(state))</code></pre>
+</div>
+<div id="basic-cleaningn" class="section level1">
+<h1>basic cleaningn</h1>
+<pre class="r"><code>#remain those have Tx
+
+y_state_t&lt;-y_state
+state_num&lt;-summary(y_state$state,maxsum = 500)
+
+y_state_t&lt;-filter(y_state_t,state==&quot;TX&quot;|state==&quot;TEXAS&quot;)
+city_c&lt;-summary(y_state_t$city,maxsum = 500)
+name_city&lt;-names(city_c)
+
+#change summary of state and city into data frame
+
+city_ystate&lt;-data.frame(city_c)
+city_ystate$city&lt;-as.factor(name_city)
+
+#clear nonsense data$rename
+city_ystate&lt;-filter(city_ystate,city_c&gt;0)
+vector&lt;-c(&quot;number&quot;,&quot;city&quot;)
+citylist&lt;-city_ystate$city
+
+colnames(city_ystate)&lt;-vector
+rownames(city_ystate)&lt;-citylist
+
+#for those without state
+
+
+#bind city together:
+city_total&lt;-city_ystate+city_nstate</code></pre>
+<ol start="4" style="list-style-type: decimal">
+<li><p>Count the specific location information</p></li>
+<li><p>Put location information into GIS</p></li>
+<li><p>Use IDW tool to draw the difference over time on map.</p></li>
+</ol>
 </div>
 
 
