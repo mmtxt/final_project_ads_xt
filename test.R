@@ -44,7 +44,10 @@ colnames(city_ystate)<-vector
 rownames(city_ystate)<-citylist
 
 #for those without state
+#use citylist to find same city and add to count
 
+city_nstate<-no_state[ ,"city"]
+city_nstate<-
 
 #bind city together:
 city_total<-city_ystate+city_nstate
