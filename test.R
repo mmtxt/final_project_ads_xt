@@ -23,11 +23,11 @@ y_state<-filter(cHH9_4,state!="USA"
 
 #remain those have Tx
 
-y_state_t<-y_state
+
 state_num<-summary(y_state$state,maxsum = 500)
 
-y_state_t<-filter(y_state_t,state=="TX"|state=="TEXAS")
-city_c<-summary(y_state_t$city,maxsum = 500)
+y_state<-filter(y_state,state=="TX"|state=="TEXAS")
+city_c<-summary(y_state$city,maxsum = 500)
 name_city<-names(city_c)
 
 #change summary of state and city into data frame
