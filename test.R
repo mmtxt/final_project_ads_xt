@@ -5,6 +5,7 @@ library(rebus)
 #for location, seperate state and city
 library(tidyr)
 library(dplyr)
+library(ggplot2)
 #delete location information that is useless,seperate the dataset based on states.
 cHH9_4<-separate(cHH9_4,location,c("city","state"),sep=",")
 
@@ -48,7 +49,8 @@ rownames(city_ystate)<-citylist
 
 city_nstate<-no_state[ ,"city"]
 city_nstate<-
-
+  
+no_state$city %in% city_ystate$city
 #bind city together:
 city_total<-city_ystate+city_nstate
 
@@ -56,13 +58,12 @@ city_total<-city_ystate+city_nstate
 
 #plot the location information
 
-hist(city_ystate$city,city_ystate$number)
-
-
-
-
-
-
-
+#make sure the city list from the smallest to highest
+city_ystate$city <- factor(city_ystate$city, levels=unique(city_ystate$city))
+ggplot(city_ystate,aes(x=city,y=number))+
+  geom_bar(stat = "identity")+
+  coord_flip()+
+  labs(title="city count")
+  
 
 

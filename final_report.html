@@ -124,25 +124,23 @@ $(document).ready(function () {
 
 <div id="introduction" class="section level1">
 <h1>introduction</h1>
-<p>A major disaster is currently underway with <a href="https://en.wikipedia.org/wiki/Hurricane_Harvey.">hurricane Harvey</a> Use <a href="https://twitter.com/">twitter</a> to identify times and areas that are hardest hit from the hurricane</p>
+<p>Hurricane Harvey is an Atlantic hurricane that has attack America for several times in the past year. The most recent attack happened on August 13 when the National Hurricane center detect the hurricane on the western east of Africa. It hit United States on Texas and Louisiana on August 23rd. In this project, I am going to use the information from twitter to identify possible the most serious hurt area and its possible moving route.</p>
 </div>
-<div id="basic-data-source" class="section level1">
-<h1>basic data source</h1>
-<ul>
-<li><a href="https://twitter.com/">twitter</a></li>
-<li><a href="http://geoffjentry.hexdump.org/twitteR.pdf">twitterR package</a></li>
-</ul>
-</div>
-<div id="prepare-for-the-data" class="section level1">
-<h1>prepare for the data:</h1>
+<div id="method" class="section level1">
+<h1>Method:</h1>
 <ol style="list-style-type: decimal">
-<li><p>start with scripting data from twitter. Since I am not familiar with python, I am going to use TwitterR package to help me. The detail instruction is here <a href="http://geoffjentry.hexdump.org/twitteR.pdf" class="uri">http://geoffjentry.hexdump.org/twitteR.pdf</a> &amp; <a href="https://github.com/geoffjentry/twitteR" class="uri">https://github.com/geoffjentry/twitteR</a></p></li>
-<li><p>Follow the instruction, first I need to create a Twitter Aplication:</p></li>
+<li>Basic assumption:</li>
 </ol>
+<p>1.1. The severity of the hurricane affects the times people tweets.</p>
+<p>1.2. The location information in the location column the tweet original display is accurate and represent the people’s real location.</p>
+<p>1.3. The missing and useless data is random.</p>
+<ol start="2" style="list-style-type: decimal">
+<li>Data extraction:</li>
+</ol>
+<p>2.1 The data comes from twitter from Sep 4th to Sep 8th. For each day, I pooled the 10,000 tweets data from the API(except for Sep 4th ) and use the location information as the basic data source to identify the path of hurricane and use the number of the same location occur as the severity of the hit.</p>
+<p>2.2 Follow the instruction, first I need to create a Twitter Aplication:</p>
 <p>I create a new application with the name of xtao8 and get the API key, API secreat, Access token and Access secret.</p>
-<ol start="3" style="list-style-type: decimal">
-<li>Install twitterR. Since I would like to access Harvey and it mainly start on August 17th at night, I would like to start my search from August 25 and follow until 09/08/2017. If the data set is too big, it would be difficult to analysis. So I would like to pull random sample several times and get useful information from them.</li>
-</ol>
+<p>2.3 Install twitterR. Since I would like to access Harvey and it mainly start on August 17th at night, I would like to start my search from August 25 and follow until 09/08/2017. If the data set is too big, it would be difficult to analysis. So I would like to pull random sample several times and get useful information from them.</p>
 <p>The code I used:</p>
 <pre class="r"><code>#getting the data: install twitterR since install.pacakge(&quot;twitterR&quot;)is not avialble
 #let me try another one
@@ -158,12 +156,10 @@ setup_twitter_oauth(&quot;gLvw86UAzsVGG4lNoBTCttQjg&quot;,
                     &quot;n8lL1J7HlAhupOGdOVJFyLcNObxWtyxkffTGAnytyqjY1&quot;)
 #selection:
 1</code></pre>
-</div>
-<div id="getting-and-cleaning-data" class="section level1">
-<h1>getting and cleaning data:</h1>
-<ol style="list-style-type: decimal">
-<li>First, I would like to try to pull 10000 sample from the twitter randomly and see how much data can be used. The day I can go back as early as possible is 9/5, so start from 9/5, I will get 5 days data and change it into data frame.</li>
+<ol start="3" style="list-style-type: decimal">
+<li>getting and cleaning data:</li>
 </ol>
+<p>3.1. First, I would like to try to pull 10000 sample from the twitter randomly and see how much data can be used. The day I can go back as early as possible is 9/5, so start from 9/5, I will get 5 days data and change it into data frame.</p>
 <pre class="r"><code>#data at 9-4
 sample_9_4&lt;-searchTwitter('#HurricaneHarvey until:2017-9-5', n=10000)
 #data at 9-5
@@ -179,20 +175,8 @@ HH9_5&lt;-twListToDF(sample_9_5)
 HH9_6&lt;-twListToDF(sample_9_6)
 HH9_7&lt;-twListToDF(sample_9_7)
 HH9_8&lt;-twListToDF(sample_9_8)</code></pre>
-<p>clear the useless data</p>
-<pre class="r"><code>rm(sample_9_4)
-rm(sample_9_5)
-rm(sample_9_6)
-rm(sample_9_7)
-rm(sample_9_8)</code></pre>
-<ol start="2" style="list-style-type: decimal">
-<li>Delete lines without location information</li>
-</ol>
-<pre class="r"><code>#read in the dataset
-
-
-
-#load tidytext and dplyr
+<p>3.2. Delete lines without location information in the original dataset and create new dataset called cHHs.</p>
+<pre class="r"><code>#load tidytext and dplyr
 library(tidytext)
 library(dplyr)
 
@@ -221,19 +205,14 @@ cHH9_7&lt;-filter(HH9_7,location!=&quot;NA&quot;)
 HH9_8$location[HH9_8$location==&quot;&quot;]&lt;-&quot;NA&quot;  
 HH9_8$location&lt;-as.factor(HH9_8$location)
 cHH9_8&lt;-filter(HH9_8,location!=&quot;NA&quot;)</code></pre>
-<pre><code>##        X observation_num variable_num
+<p>After the step before, I got the row data for 5 days listed in the table below.</p>
+<pre><code>##    dates observation_num variable_num
 ## 1 cHH9_4            3256           20
 ## 2 cHH9_5            7521           19
 ## 3 cHH9_6            7359           19
 ## 4 cHH9_7            7503           19
 ## 5 cHH9_8            7411           19</code></pre>
-</div>
-<div id="basic-eda-report" class="section level1">
-<h1>basic EDA report:</h1>
-<p>After first step cleaning, I got 5datasets with location information. At the date 9/4, I got <code>dim(cHH9_4)[1]</code> observations of <code>dim(cHH9_4)[2]</code>variables At the date 9/5, I got <code>dim(cHH9_5)[1]</code> observations of <code>dim(cHH9_5)[2]</code>variables At the date 9/6, I got <code>dim(cHH9_6)[1]</code> observations of <code>dim(cHH9_6)[2]</code>variables At the date 9/7, I got <code>dim(cHH9_7)[1]</code> observations of <code>dim(cHH9_7)[2]</code>variables At the date 9/8, I got <code>dim(cHH9_8)[1]</code> observations of <code>dim(cHH9_8)[2]</code>variables</p>
-</div>
-<div id="basic-cleaning-of-the-data94-as-an-example" class="section level1">
-<h1>Basic cleaning of the data(9/4 as an example)</h1>
+<p>3.3 In order to continue</p>
 <pre class="r"><code>cHH9_4&lt;-separate(cHH9_4,location,c(&quot;city&quot;,&quot;state&quot;),sep=&quot;,&quot;)
 
 cHH9_4$state&lt;-toupper(cHH9_4$state)
@@ -246,9 +225,7 @@ no_state&lt;-filter(cHH9_4,state==&quot;USA&quot;
                  |is.na(state))
 y_state&lt;-filter(cHH9_4,state!=&quot;USA&quot;
                  &amp;!is.na(state))</code></pre>
-</div>
-<div id="cleaning_continue" class="section level1">
-<h1>cleaning_continue</h1>
+<p>3.4</p>
 <pre class="r"><code>#remain those have Tx
 
 state_num&lt;-summary(y_state$state,maxsum = 500)
@@ -288,6 +265,13 @@ city_total&lt;-city_ystate+city_nstate</code></pre>
 </div>
 <div id="use-idw-tool-to-draw-the-difference-over-time-on-map." class="section level1">
 <h1>Use IDW tool to draw the difference over time on map.</h1>
+</div>
+<div id="data-source" class="section level1">
+<h1>Data source:</h1>
+<ul>
+<li><a href="https://twitter.com/">twitter</a></li>
+<li><a href="http://geoffjentry.hexdump.org/twitteR.pdf">twitterR package</a></li>
+</ul>
 </div>
 
 
