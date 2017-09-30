@@ -118,12 +118,13 @@ HH9_8$location<-as.factor(HH9_8$location)
 cHH9_8<-filter(HH9_8,location!="NA")
 
 ```
-
+#basic EDA report:
 ```{r echo=FALSE}
 dim<-read.csv("dim.csv")
 colnames(dim)[1]<-"dates"
+dim
 ```
-#basic EDA report:
+
 
 
 

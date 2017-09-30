@@ -35,6 +35,9 @@ HH9_8$location[HH9_8$location==""]<-"NA"
 HH9_8$location<-as.factor(HH9_8$location)
 cHH9_8<-filter(HH9_8,location!="NA")
 
+HH9_29$location[HH9_29$location=="NA"]<-NA  
+HH9_29$location<-as.factor(HH9_29$location)
+cHH9_29<-filter(HH9_29,!is.na(location))
 
 #visualize data:
 

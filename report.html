@@ -124,14 +124,7 @@ $(document).ready(function () {
 
 <div id="introduction" class="section level1">
 <h1>introduction</h1>
-<p>A major disaster is currently underway with <a href="https://en.wikipedia.org/wiki/Hurricane_Harvey.">hurricane Harvey</a> Use <a href="https://twitter.com/">twitter</a> to identify times and areas that are hardest hit from the hurricane</p>
-</div>
-<div id="basic-data-source" class="section level1">
-<h1>basic data source</h1>
-<ul>
-<li><a href="https://twitter.com/">twitter</a></li>
-<li><a href="http://geoffjentry.hexdump.org/twitteR.pdf">twitterR package</a></li>
-</ul>
+<p>Hurricane Harvey is an Atlantic hurricane that has attack America for several times in the past year. The most recent attack happened on August 13 when the National Hurricane center detect the hurricane on the western east of Africa. It hit United States on Texas and Louisiana on August 23rd. In this project, I am going to use the information from twitter to identify possible the most serious hurt area and its possible moving route.</p>
 </div>
 <div id="prepare-for-the-data" class="section level1">
 <h1>prepare for the data:</h1>
@@ -221,16 +214,16 @@ cHH9_7&lt;-filter(HH9_7,location!=&quot;NA&quot;)
 HH9_8$location[HH9_8$location==&quot;&quot;]&lt;-&quot;NA&quot;  
 HH9_8$location&lt;-as.factor(HH9_8$location)
 cHH9_8&lt;-filter(HH9_8,location!=&quot;NA&quot;)</code></pre>
-<pre><code>##        X observation_num variable_num
-## 1 cHH9_4            3256           20
-## 2 cHH9_5            7521           19
-## 3 cHH9_6            7359           19
-## 4 cHH9_7            7503           19
-## 5 cHH9_8            7411           19</code></pre>
 </div>
 <div id="basic-eda-report" class="section level1">
 <h1>basic EDA report:</h1>
-<p>After first step cleaning, I got 5datasets with location information. At the date 9/4, I got <code>dim(cHH9_4)[1]</code> observations of <code>dim(cHH9_4)[2]</code>variables At the date 9/5, I got <code>dim(cHH9_5)[1]</code> observations of <code>dim(cHH9_5)[2]</code>variables At the date 9/6, I got <code>dim(cHH9_6)[1]</code> observations of <code>dim(cHH9_6)[2]</code>variables At the date 9/7, I got <code>dim(cHH9_7)[1]</code> observations of <code>dim(cHH9_7)[2]</code>variables At the date 9/8, I got <code>dim(cHH9_8)[1]</code> observations of <code>dim(cHH9_8)[2]</code>variables</p>
+<pre><code>##   dates observation_num variable_num
+## 1   9-4            3256           20
+## 2   9-5            7521           19
+## 3   9-6            7359           19
+## 4   9-7            7503           19
+## 5   9-8            7411           19
+## 6  9-29            6798           19</code></pre>
 </div>
 <div id="basic-cleaning-of-the-data94-as-an-example" class="section level1">
 <h1>Basic cleaning of the data(9/4 as an example)</h1>
@@ -288,6 +281,13 @@ city_total&lt;-city_ystate+city_nstate</code></pre>
 </div>
 <div id="use-idw-tool-to-draw-the-difference-over-time-on-map." class="section level1">
 <h1>Use IDW tool to draw the difference over time on map.</h1>
+</div>
+<div id="data-source" class="section level1">
+<h1>Data source:</h1>
+<ul>
+<li><a href="https://twitter.com/">twitter</a></li>
+<li><a href="http://geoffjentry.hexdump.org/twitteR.pdf">twitterR package</a></li>
+</ul>
 </div>
 
 

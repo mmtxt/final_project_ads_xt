@@ -37,5 +37,6 @@ HH9_6<-twListToDF(sample_9_6)
 HH9_7<-twListToDF(sample_9_7)
 HH9_8<-twListToDF(sample_9_8)
 
-#delete the useless data:
-
+#collect correction data?
+HH9_29<-searchTwitter('a until:2017-9-30 ',n=10000)
+HH9_29<-twListToDF(HH9_29)

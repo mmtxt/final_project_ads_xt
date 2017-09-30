@@ -59,27 +59,19 @@ setup_twitter_oauth("gLvw86UAzsVGG4lNoBTCttQjg",
 3. getting and cleaning data:
 
 3.1. First, I would like to try to pull 10000 sample from the twitter randomly and see how much data can be used.
-The day I can go back as early as possible is 9/5, so start from 9/5, I will get 5 days data and change it into data frame.
+The day I can go back as early as possible is 9/5, so start from 9/5, I will get 5 days data and change it into data frame. The code used list below, using 9-4 and 9-29 as an example
 
 ```{r eval=FALSE}
 #data at 9-4
 sample_9_4<-searchTwitter('#HurricaneHarvey until:2017-9-5', n=10000)
-#data at 9-5
-sample_9_5<-searchTwitter('#HurricaneHarvey until:2017-9-6', n=10000)
-#data at 9-6
-sample_9_6<-searchTwitter('#HurricaneHarvey until:2017-9-7', n=10000)
-#data at 9-7
-sample_9_7<-searchTwitter('#HurricaneHarvey until:2017-9-8', n=10000)
-#data at 9-8
-sample_9_8<-searchTwitter('#HurricaneHarvey until:2017-9-9', n=10000)
 HH9_4<-twListToDF(sample_9_4)
-HH9_5<-twListToDF(sample_9_5)
-HH9_6<-twListToDF(sample_9_6)
-HH9_7<-twListToDF(sample_9_7)
-HH9_8<-twListToDF(sample_9_8)
+#data at 9-29
+HH9_29<-searchTwitter('a until:2017-9-30 ',n=10000)
+HH9_29<-twListToDF(HH9_29)
+
 ```
 
-3.2. Delete lines without location information in the original dataset and create new dataset called cHHs.
+3.2. Delete lines without location information in the original dataset and create new dataset called cHHs.(9-4as an example)
 
 ```{r eval=FALSE}
 
@@ -92,34 +84,7 @@ library(dplyr)
 HH9_4$location[HH9_4$location==""]<-"NA"  
 HH9_4$location<-as.factor(HH9_4$location)
 cHH9_4<-filter(HH9_4,location!="NA")
-  
 
-HH9_5$location[HH9_5$location==""]<-"NA"  
-HH9_5$location<-as.factor(HH9_5$location)
-cHH9_5<-filter(HH9_5,location!="NA")
-
-
-HH9_6$location[HH9_6$location==""]<-"NA"  
-HH9_6$location<-as.factor(HH9_6$location)
-cHH9_6<-filter(HH9_6,location!="NA")
-
-
-HH9_7$location[HH9_7$location==""]<-"NA"  
-HH9_7$location<-as.factor(HH9_7$location)
-cHH9_7<-filter(HH9_7,location!="NA")
-
-
-HH9_8$location[HH9_8$location==""]<-"NA"  
-HH9_8$location<-as.factor(HH9_8$location)
-cHH9_8<-filter(HH9_8,location!="NA")
-
-```
-
-After the step before, I got the row data for 5 days listed in the table below.
-```{r echo=FALSE}
-dim<-read.csv("dim.csv")
-colnames(dim)[1]<-"dates"
-dim
 ```
 
 
@@ -142,51 +107,193 @@ y_state<-filter(cHH9_4,state!="USA"
 ```
 
 
-3.4 I calculated the time each city shows in TX and LA, both in the data that containing a state information and without state information.
+3.4 I calculated the time each city shows in TX and LA, both in the data that containing a state information and without state information. Add state information to the final dataframe
 
 ```{r eval=FALSE}
 
 #remain those have Tx
 
-state_num<-summary(y_state$state,maxsum = 500)
-
-y_state<-filter(y_state,state=="TX"|state=="TEXAS")
-city_c<-summary(y_state$city,maxsum = 500)
-name_city<-names(city_c)
-
+y_state_1<-filter(y_state,state=="TX"|state=="TEXAS")
+y_state_2<-filter(y_state,state=="LA"|state=="LOUISIANA")
+y_state_3<-filter(y_state,state=="MA"|state=="MASSACHUSETTS")
+y_state_4<-filter(y_state,state=="NV"|state=="NEVADA")
+                  
+city_c_1<-summary(y_state_1$city,maxsum = 500)
+city_c_2<-summary(y_state_2$city,maxsum = 500)
+city_c_3<-summary(y_state_3$city,maxsum = 500)
+city_c_4<-summary(y_state_4$city,maxsum = 500)
+name_city_1<-names(city_c_1)
+name_city_2<-names(city_c_2)
+name_city_3<-names(city_c_3)
+name_city_4<-names(city_c_4)
 #change summary of state and city into data frame
 
-city_ystate<-data.frame(city_c)
-city_ystate$city<-as.factor(name_city)
 
+city_ystate_1<-data.frame(city_c_1)
+city_ystate_2<-data.frame(city_c_2)
+city_ystate_3<-data.frame(city_c_3)
+city_ystate_4<-data.frame(city_c_4)
+city_ystate_1$city<-as.factor(name_city_1)
+city_ystate_2$city<-as.factor(name_city_2)
+city_ystate_3$city<-as.factor(name_city_3)
+city_ystate_4$city<-as.factor(name_city_4)
+
+city_ystate_1$state<-as.factor("TX")
+city_ystate_2$state<-as.factor("LA")
+city_ystate_3$state<-as.factor("MA")
+city_ystate_4$state<-as.factor("NV")
+
+vector<-c("number","city","state")
+
+colnames(city_ystate_1)<-vector
+colnames(city_ystate_2)<-vector
+colnames(city_ystate_3)<-vector
+colnames(city_ystate_4)<-vector
+
+city_ystate<-rbind(city_ystate_1,city_ystate_2,city_ystate_3,city_ystate_4)
 #clear nonsense data$rename
-city_ystate<-filter(city_ystate,city_c>0)
-vector<-c("number","city")
-citylist<-city_ystate$city
+city_ystate<-filter(city_ystate,number>0)
+#reorder
+city_ystate<-city_ystate[order(-city_ystate$number), ]
 
-colnames(city_ystate)<-vector
-rownames(city_ystate)<-citylist
+write.csv(city_ystate,"citys.csv")
+```
+4.	Graphing:
+The graphing process containing several different steps. 
+4.1	basic row data exploration. Graphing the first 20 cities that have the most frequency of showing for different dates using ggplot (geom_bar) and for the reference dates, too. The code used showed below, also, take day 9-4 as an example
 
-#for those without state
-#use citylist to find same city and add to count
+```{r eval=FALSE}
+city_ystate$city <- factor(city_ystate$city, levels=unique(city_ystate$city))
+ggplot(head(city_ystate,20),aes(x=city,y=number,fill=state))+
+  geom_bar(stat = "identity")+
+  coord_flip()+
+  labs(title="city count")
+```
 
-city_nstate<-no_state[ ,"city"]
-city_nstate<-
+
+4.2	using ggmap package and ggplot to graph the area on the map as to visualize the data.
+```{r eval=FALSE}
+library(ggmap)
+library(mapproj)
+
+location<-city_ystate
+location$longi<-NA
+location$latti<-NA
+
+for(i in 1:nrow(location)){
+    location[i, 4:5] <- geocode(as.character(location[i,2])) %>% as.numeric
+}
+
+#for those not fitted in the first loop
+
+for(i in 1:nrow(location)){
+  if(is.na(location[i, 4])){
+  location[i, 4:5] <- geocode(as.character(location[i,2])) %>% as.numeric
+  }
+  else{}
+}
+location<-filter(location,!is.na(longi))
+location<-filter(location,longi<=-60&longi>=-140&latti>=20&latti<=50)
+#compare with the other state:
+
+usa_center <- as.numeric(geocode("United States"))
+USAMap <- ggmap(get_googlemap(center=usa_center, zoom=4, maptype = "roadmap"), 
+                extent="normal")
+
+USAMap +  geom_point(aes(x=longi, y = latti), data = location,
+             alpha=0.6, col="orange",size = location$number*0.1)+
+  geom_point(aes(x = longi, y = latti), data = location, 
+             alpha = 0.3, col = "blue", size = 1) +
+  scale_size_continuous(range = range(location$number))
+
+#compare within the state:
+
+statemap<-get_map(location='Texas',zoom=6,maptype="toner")
+statemap<-ggmap(statemap)
+
+texas<-filter(location,state=="TX"|state=="LA")
+statemap +  geom_point(aes(x=longi, y = latti), data = texas,
+                     alpha=0.2, col="yellow",size = texas$number*0.7)+
+  geom_point(aes(x = longi, y = latti), data = texas, 
+             alpha = 0.6, col = "red", size = 2) +
+  scale_size_continuous(range = range(texas$number))
+
+```
+
+5.	Assumption checking
+In order to exclude the influence of the city and total population of the number of tweets, I also pull another day’s data(Sep 30th) as the baseline data, to access whether there is pattern change based on the assumption.
 
 
-#bind city together:
-city_total<-city_ystate+city_nstate
+#result:
+1.	Raw data:
 
+After the step before, I got the row data for 5 days listed in the table below.
+```{r echo=FALSE}
+dim<-read.csv("dim.csv")
+colnames(dim)[1]<-"dates"
+dim
+```
+
+2.	Top 20 cities based on different dates
+
+3.	Graphing
+
+
+```{r echo=FALSE}
+city_ystate<-read.csv("citys.csv")
+library(ggplot2)
+city_ystate$city <- factor(city_ystate$city, levels=unique(city_ystate$city))
+ggplot(head(city_ystate,20),aes(x=city,y=number,fill=state))+
+  geom_bar(stat = "identity")+
+  coord_flip()+
+  labs(title="city count")
+
+```
+Comparing with other state in the whole map:
+
+
+```{r echo=FALSE}
+library(ggmap)
+library(mapproj)
+location<-read.csv("location.csv")
+#compare with the other state:
+
+usa_center <- as.numeric(geocode("United States"))
+USAMap <- ggmap(get_googlemap(center=usa_center, zoom=4, maptype = "roadmap"), 
+                extent="normal")
+
+USAMap +  geom_point(aes(x=longi, y = latti), data = location,
+             alpha=0.6, col="orange",size = location$number*0.1)+
+  geom_point(aes(x = longi, y = latti), data = location, 
+             alpha = 0.3, col = "blue", size = 1) +
+  scale_size_continuous(range = range(location$number))
+```
+compare within the state of LA and TX
+
+
+```{r echo=FALSE}
+
+statemap<-get_map(location='Texas',zoom=6,maptype="toner")
+statemap<-ggmap(statemap)
+
+texas<-filter(location,location$state=="TX"|location$state=="LA")
+statemap +  geom_point(aes(x=longi, y = latti), data = texas,
+                     alpha=0.2, col="yellow",size = texas$number*0.7)+
+  geom_point(aes(x = longi, y = latti), data = texas, 
+             alpha = 0.6, col = "red", size = 2) +
+  scale_size_continuous(range = range(texas$number))
 
 ```
 
 
-# match city to geographic points
 
 
-# Put location information into GIS
+4.	In the map
 
-# Use IDW tool to draw the difference over time on map.
+
+
+
+5.	Checking the assumption
 
 
 

@@ -14,3 +14,10 @@ no_state$city %in% city_ystate$city
 left_join()
 
 readin
+
+location <- data.frame(loc = location[!is.na(location)], stringsAsFactors =  F) %>%
+  group_by(loc) %>%
+  tally() %>%
+  arrange(desc(n)) %>%
+  as.data.frame() %>%
+  mutate(longi = NA, latti = NA)

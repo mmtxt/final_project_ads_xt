@@ -65,5 +65,9 @@ ggplot(city_ystate,aes(x=city,y=number))+
   coord_flip()+
   labs(title="city count")
   
+for(i in 4:8){
+  locat[i]<-i
+  print(location[i])
+  }
 
 
