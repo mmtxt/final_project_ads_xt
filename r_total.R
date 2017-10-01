@@ -60,39 +60,39 @@ rm(sample_9_8)
 
 HH9_4$location[HH9_4$location==""]<-NA  
 HH9_4$location<-as.factor(HH9_4$location)
-cHH9_4<-filter(HH9_4,is.na(location))
+cHH9_4<-filter(HH9_4,!is.na(location))
 
 
 HH9_5$location[HH9_5$location==""]<-NA  
 HH9_5$location<-as.factor(HH9_5$location)
-cHH9_5<-filter(HH9_5,is.na(location))
+cHH9_5<-filter(HH9_5,!is.na(location))
 
 
 HH9_6$location[HH9_6$location==""]<-NA  
 HH9_6$location<-as.factor(HH9_6$location)
-cHH9_6<-filter(HH9_6,is.na(location))
+cHH9_6<-filter(HH9_6,!is.na(location))
 
 
 HH9_7$location[HH9_7$location==""]<-NA  
 HH9_7$location<-as.factor(HH9_7$location)
-cHH9_7<-filter(HH9_7,is.na(location))
+cHH9_7<-filter(HH9_7,!is.na(location))
 
 
 HH9_8$location[HH9_8$location==""]<-NA  
 HH9_8$location<-as.factor(HH9_8$location)
-cHH9_8<-filter(HH9_8,is.na(location))
+cHH9_8<-filter(HH9_8,!is.na(location))
 
 HH9_29$location[HH9_29$location==""]<-NA  
 HH9_29$location<-as.factor(HH9_29$location)
 cHH9_29<-filter(HH9_29,!is.na(location))
 
 #export data:
-write.csv(HH9_4,"9-4.csv")
-write.csv(HH9_5,"9-5.csv")
-write.csv(HH9_6,"9-6.csv")
-write.csv(HH9_7,"9-7.csv")
-write.csv(HH9_8,"9-8.csv")
-write.csv(HH9_29,"9-29.csv")
+write.csv(cHH9_4,"c9-4.csv")
+write.csv(cHH9_5,"c9-5.csv")
+write.csv(cHH9_6,"c9-6.csv")
+write.csv(cHH9_7,"c9-7.csv")
+write.csv(cHH9_8,"c9-8.csv")
+write.csv(cHH9_29,"c9-29.csv")
 #visualize data:
 
 dim1<-dim(cHH9_4)
@@ -123,16 +123,44 @@ library(tidyr)
 library(dplyr)
 library(ggplot2)
 #delete location information that is useless,seperate the dataset based on states.
-cHH9_5<-separate(cHH9_5,location,c("city","state"),sep=",")
 
-cHH9_5<-filter(cHH9_5,language=="en")
+cHH9_4<-separate(cHH9_4,location,c("city","state"),sep=",")
+cHH9_4$state<-toupper(cHH9_4$state)
+cHH9_4$city<-toupper(cHH9_4$city)
+cHH9_4$state<-as.factor(str_replace_all(cHH9_4$state,pattern=" ",replacement=""))
+cHH9_4$city<-as.factor(str_replace_all(cHH9_4$city,pattern=" ",replacement=""))
+
+cHH9_5<-separate(cHH9_5,location,c("city","state"),sep=",")
 cHH9_5$state<-toupper(cHH9_5$state)
 cHH9_5$city<-toupper(cHH9_5$city)
-
 cHH9_5$state<-as.factor(str_replace_all(cHH9_5$state,pattern=" ",replacement=""))
 cHH9_5$city<-as.factor(str_replace_all(cHH9_5$city,pattern=" ",replacement=""))
 
-cHH9_5$city<-as.factor(str_replace_all(cHH9_5$city,pattern=" ",replacement=""))
+cHH9_6<-separate(cHH9_6,location,c("city","state"),sep=",")
+cHH9_6$state<-toupper(cHH9_6$state)
+cHH9_6$city<-toupper(cHH9_6$city)
+cHH9_6$state<-as.factor(str_replace_all(cHH9_6$state,pattern=" ",replacement=""))
+cHH9_6$city<-as.factor(str_replace_all(cHH9_6$city,pattern=" ",replacement=""))
+
+cHH9_7<-separate(cHH9_7,location,c("city","state"),sep=",")
+cHH9_7$state<-toupper(cHH9_7$state)
+cHH9_7$city<-toupper(cHH9_7$city)
+cHH9_7$state<-as.factor(str_replace_all(cHH9_7$state,pattern=" ",replacement=""))
+cHH9_7$city<-as.factor(str_replace_all(cHH9_7$city,pattern=" ",replacement=""))
+
+cHH9_8<-separate(cHH9_8,location,c("city","state"),sep=",")
+cHH9_8$state<-toupper(cHH9_8$state)
+cHH9_8$city<-toupper(cHH9_8$city)
+cHH9_8$state<-as.factor(str_replace_all(cHH9_8$state,pattern=" ",replacement=""))
+cHH9_8$city<-as.factor(str_replace_all(cHH9_8$city,pattern=" ",replacement=""))
+
+cHH9_29<-separate(cHH9_29,location,c("city","state"),sep=",")
+cHH9_29$state<-toupper(cHH9_29$state)
+cHH9_29$city<-toupper(cHH9_29$city)
+cHH9_29$state<-as.factor(str_replace_all(cHH9_29$state,pattern=" ",replacement=""))
+cHH9_29$city<-as.factor(str_replace_all(cHH9_29$city,pattern=" ",replacement=""))
+
+#filter
 
 no_state<-filter(cHH9_4,state=="USA"
                  |is.na(state))
@@ -238,6 +266,7 @@ USAMap +  geom_point(aes(x=longi, y = latti), data = location,
 
 statemap<-get_map(location='Texas',zoom=6,maptype="toner")
 statemap<-ggmap(statemap)
+
 
 texas<-filter(location,state=="TX"|state=="LA")
 statemap +  geom_point(aes(x=longi, y = latti), data = texas,

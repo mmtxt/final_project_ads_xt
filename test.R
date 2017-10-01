@@ -70,4 +70,4 @@ for(i in 4:8){
   print(location[i])
   }
 
-
+assign(paste("i","n",sep=""),separate(get(paste(cHH9_5,location,c("city","state"),sep=","))

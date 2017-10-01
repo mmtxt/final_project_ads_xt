@@ -47,13 +47,28 @@ library(devtools)
 install_github("geoffjentry/twitteR")
 
 library(twitteR)
-setup_twitter_oauth("gLvw86UAzsVGG4lNoBTCttQjg", 
-                    "gbBf9OW1PMz2KXMZx9Wo3neKgXNSpvG3abgt3A3TxcBWxefmjm",
-                    "770639700839333888-foZXS5jtNXc7bWdpNnUR18Gb5fPQSp9",
-                    "n8lL1J7HlAhupOGdOVJFyLcNObxWtyxkffTGAnytyqjY1")
+setup_twitter_oauth("API key", 
+                    "API secret",
+                    "Access token",
+                    "Access secret")
 #selection:
 1
 ```
+
+
+```{r warning=FALSE,message=FALSE,error=FALSE}
+#load useful package
+library(dplyr)
+library(stringr)
+library(rebus)
+library(tidyr)
+library(ggplot2)
+library(ggmap)
+library(mapproj)
+library(twitteR)
+
+```
+
 
 
 3. getting and cleaning data:
@@ -75,15 +90,18 @@ HH9_29<-twListToDF(HH9_29)
 
 ```{r eval=FALSE}
 
-#load tidytext and dplyr
-library(tidytext)
-library(dplyr)
 
 #select data that have location information
 
-HH9_4$location[HH9_4$location==""]<-"NA"  
-HH9_4$location<-as.factor(HH9_4$location)
-cHH9_4<-filter(HH9_4,location!="NA")
+for(i in c(4:8,29)){
+ cHHs<-get(paste("HH9",i,sep="_"))
+ cHHs$location[cHHs$location==""]<-NA  
+ cHHs$location<-as.factor(cHHs$location)
+ cHHs<-filter(cHHs,!is.na(location))
+ write.csv(cHHs,paste("c9-",i,".csv",sep=""))
+ assign(paste("cHH9",i,sep="_"),cHHs)
+ 
+}
 
 ```
 
@@ -91,19 +109,17 @@ cHH9_4<-filter(HH9_4,location!="NA")
 3.3 In order to continue analysis, I need first clean the format of the data, seperate the location information by city and state, showing all the charachers in upper form and cleaning the spaces. After that, I seperate the dataset into two part, the one with useful state information and the one without useful state information.
 
 ```{r eval=FALSE}
+#seperate the location information into state and city,export those data with state information
+for(i in c(4:8,29)){
+  temp<-get(paste("cHH9",i,sep="_"))
+  temp<-separate(temp,location,c("city","state"),sep=",")
+  temp$state<-toupper(temp$state)
+  temp$city<-toupper(temp$city)
+  temp$state<-as.factor(str_replace_all(temp$state,pattern=" ",replacement=""))
+  temp$city<-as.factor(str_replace_all(temp$city,pattern=" ",replacement=""))
+  assign(paste("cHH9",i,sep="_"),temp)
+}
 
-cHH9_4<-separate(cHH9_4,location,c("city","state"),sep=",")
-
-cHH9_4$state<-toupper(cHH9_4$state)
-cHH9_4$city<-toupper(cHH9_4$city)
-
-cHH9_4$state<-as.factor(str_replace_all(cHH9_4$state,pattern=" ",replacement=""))
-cHH9_4$city<-as.factor(str_replace_all(cHH9_4$city,pattern=" ",replacement=""))
-
-no_state<-filter(cHH9_4,state=="USA"
-                 |is.na(state))
-y_state<-filter(cHH9_4,state!="USA"
-                 &!is.na(state))
 ```
 
 
@@ -111,113 +127,216 @@ y_state<-filter(cHH9_4,state!="USA"
 
 ```{r eval=FALSE}
 
-#remain those have Tx
-
-y_state_1<-filter(y_state,state=="TX"|state=="TEXAS")
-y_state_2<-filter(y_state,state=="LA"|state=="LOUISIANA")
-y_state_3<-filter(y_state,state=="MA"|state=="MASSACHUSETTS")
-y_state_4<-filter(y_state,state=="NV"|state=="NEVADA")
+for(i in c(4:8,29)){
+  
+  temp<-get(paste("cHH9",i,sep="_"))
+  y_state<-filter(temp,state!="USA"
+                  &!is.na(state))
+  y_state_1<-filter(y_state,state=="TX"|state=="TEXAS")
+  y_state_2<-filter(y_state,state=="LA"|state=="LOUISIANA")
+  y_state_3<-filter(y_state,state=="MA"|state=="MASSACHUSETTS")
+  y_state_4<-filter(y_state,state=="NV"|state=="NEVADA")
                   
-city_c_1<-summary(y_state_1$city,maxsum = 500)
-city_c_2<-summary(y_state_2$city,maxsum = 500)
-city_c_3<-summary(y_state_3$city,maxsum = 500)
-city_c_4<-summary(y_state_4$city,maxsum = 500)
-name_city_1<-names(city_c_1)
-name_city_2<-names(city_c_2)
-name_city_3<-names(city_c_3)
-name_city_4<-names(city_c_4)
-#change summary of state and city into data frame
-
-
-city_ystate_1<-data.frame(city_c_1)
-city_ystate_2<-data.frame(city_c_2)
-city_ystate_3<-data.frame(city_c_3)
-city_ystate_4<-data.frame(city_c_4)
-city_ystate_1$city<-as.factor(name_city_1)
-city_ystate_2$city<-as.factor(name_city_2)
-city_ystate_3$city<-as.factor(name_city_3)
-city_ystate_4$city<-as.factor(name_city_4)
-
-city_ystate_1$state<-as.factor("TX")
-city_ystate_2$state<-as.factor("LA")
-city_ystate_3$state<-as.factor("MA")
-city_ystate_4$state<-as.factor("NV")
-
-vector<-c("number","city","state")
-
-colnames(city_ystate_1)<-vector
-colnames(city_ystate_2)<-vector
-colnames(city_ystate_3)<-vector
-colnames(city_ystate_4)<-vector
-
-city_ystate<-rbind(city_ystate_1,city_ystate_2,city_ystate_3,city_ystate_4)
+  for(a in 1:4){
+    assign(paste("city_c",a,sep="_"),
+           summary(get(paste("y_state",a,sep="_"))$city,
+                   maxsum = 1000))
+    assign(paste("name_city",a,sep="_"),
+           names(get(paste("city_c",a,sep="_"))))
+    assign(paste("city_ystate",a,sep="_"),
+           data.frame(get(paste("city_c",a,sep="_"))))
+    temp2<-get(paste("city_ystate",a,sep="_"))
+    temp2$city<-as.factor(get(paste("name_city",a,sep="_")))
+    
+    #add colnames
+    colnames(temp2)<-c("number","city")
+    assign(paste("city_ystate",a,sep="_"),
+           temp2)
+  }
+  city_ystate_1$state<-as.factor("TX")
+  city_ystate_2$state<-as.factor("LA")
+  city_ystate_3$state<-as.factor("MA")
+  city_ystate_4$state<-as.factor("NV")
+  city_ystate<-rbind(city_ystate_1,city_ystate_2,city_ystate_3,city_ystate_4)
+  
 #clear nonsense data$rename
-city_ystate<-filter(city_ystate,number>0)
+  city_ystate<-filter(city_ystate,number>0)  
+#calculate frequency
+  city_ystate$freq<-city_ystate[ ,"number"]/sum(city_ystate[ ,"number"])
+#add date value
+  city_ystate$date<-paste("9",i,sep="-")
 #reorder
-city_ystate<-city_ystate[order(-city_ystate$number), ]
-
-write.csv(city_ystate,"citys.csv")
+  city_ystate<-city_ystate[order(-city_ystate$number), ]
+#save the data
+  write.csv(city_ystate,paste("citys_9_",i,".csv",sep=""))
+  
+}
 ```
 4.	Graphing:
 The graphing process containing several different steps. 
 4.1	basic row data exploration. Graphing the first 20 cities that have the most frequency of showing for different dates using ggplot (geom_bar) and for the reference dates, too. The code used showed below, also, take day 9-4 as an example
 
 ```{r eval=FALSE}
-city_ystate$city <- factor(city_ystate$city, levels=unique(city_ystate$city))
-ggplot(head(city_ystate,20),aes(x=city,y=number,fill=state))+
-  geom_bar(stat = "identity")+
-  coord_flip()+
-  labs(title="city count")
+#read in the dataset
+for(i in c(4:8,29)){
+  
+  temp<-read.csv(paste("citys_9_",i,".csv",sep=""))
+  temp<-temp[ ,-1]
+  assign(paste("citys_9",i,sep="_"),temp)
+  
+}
+a<-0
+for (i in c(4:8,29)){
+  a<-a+1
+  city_ystate<-get(paste("citys_9",i,sep="_"))
+  city_ystate$city<-factor(city_ystate$city, levels=unique(city_ystate$city))
+  assign(paste("p",a,sep=""),ggplot(head(city_ystate,20),aes(x=city,y=freq,fill=state))+
+         geom_bar(stat = "identity")+
+         labs(title=paste("Sep/",i,"th",sep=""))+
+         coord_flip())
+}
 ```
 
+In order to show all the graphs in a big graph, I searched for [multigraph](http://www.cookbook-r.com/Graphs/Multiple_graphs_on_one_page_(ggplot2)/) function from the internet
+```{r eval=FALSE}
+# Multiple plot function
+#
+# ggplot objects can be passed in ..., or to plotlist (as a list of ggplot objects)
+# - cols:   Number of columns in layout
+# - layout: A matrix specifying the layout. If present, 'cols' is ignored.
+#
+# If the layout is something like matrix(c(1,2,3,3), nrow=2, byrow=TRUE),
+# then plot 1 will go in the upper left, 2 will go in the upper right, and
+# 3 will go all the way across the bottom.
+#
+multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
+  library(grid)
+
+  # Make a list from the ... arguments and plotlist
+  plots <- c(list(...), plotlist)
+
+  numPlots = length(plots)
+
+  # If layout is NULL, then use 'cols' to determine layout
+  if (is.null(layout)) {
+    # Make the panel
+    # ncol: Number of columns of plots
+    # nrow: Number of rows needed, calculated from # of cols
+    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
+                     ncol = cols, nrow = ceiling(numPlots/cols))
+  }
+
+ if (numPlots==1) {
+    print(plots[[1]])
+
+  } else {
+    # Set up the page
+    grid.newpage()
+    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+
+    # Make each plot, in the correct location
+    for (i in 1:numPlots) {
+      # Get the i,j matrix positions of the regions that contain this subplot
+      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
+
+      print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
+                                      layout.pos.col = matchidx$col))
+    }
+  }
+}
+
+```
+
+PLOT THE GRAPHT:
+``` {r eval=FALSE}
+multiplot(p1, p2, p3, p4,p5,p6, cols=2)
+```
 
 4.2	using ggmap package and ggplot to graph the area on the map as to visualize the data.
+4.2.1 first, use the ggmap get the geo information from the internet, and save the data into a new dataset
 ```{r eval=FALSE}
+#big one
 library(ggmap)
 library(mapproj)
 
-location<-city_ystate
-location$longi<-NA
-location$latti<-NA
 
-for(i in 1:nrow(location)){
-    location[i, 4:5] <- geocode(as.character(location[i,2])) %>% as.numeric
-}
+#fit geo information:
+for (i in c(4:8,29)){
+  location<-get(paste("citys_9",i,sep="_"))
+  location$longi<-NA
+  location$latti<-NA
 
-#for those not fitted in the first loop
-
-for(i in 1:nrow(location)){
-  if(is.na(location[i, 4])){
-  location[i, 4:5] <- geocode(as.character(location[i,2])) %>% as.numeric
+  for(a in 1:nrow(location)){
+    location[a, 6:7] <- geocode(as.character(location[a,2])) %>% as.numeric
   }
-  else{}
-}
-location<-filter(location,!is.na(longi))
-location<-filter(location,longi<=-60&longi>=-140&latti>=20&latti<=50)
-#compare with the other state:
-
+  
+  #for those not fitted in the first loop
+  for(b in 1:nrow(location)){
+    if(is.na(location[b, 4])){
+      location[b, 4:5] <- geocode(as.character(location[i,2])) %>% as.numeric
+    }
+    else{}
+  }
+  location<-filter(location,!is.na(longi))
+  location<-filter(location,longi<=-60&longi>=-140&latti>=20&latti<=50)
+  assign(paste("citys_9",i,sep="_"),location)
+  write.csv(location,paste("loc_9_",i,".csv",sep=""))
+} 
+```
+for the big map, comparing 9/4 with 9/29
+``````{r eval=FALSE}
+#read in the datasete
+  for(i in c(4:8,29)){
+    
+    loc<-read.csv(paste("loc_9_",i,".csv",sep=""))
+    loc<-loc[ ,-1]
+    assign(paste("loc_9",i,sep="_"),loc)
+  }
+#draw the whole map one
 usa_center <- as.numeric(geocode("United States"))
 USAMap <- ggmap(get_googlemap(center=usa_center, zoom=4, maptype = "roadmap"), 
                 extent="normal")
+b<-0
+for (i in c(4:8,29)){
+  b<-b+1
+  location<-get(paste("loc_9",i,sep="_"))
+  assign(paste("g",b,sep=""),USAMap +  
+                             geom_point(aes(x=longi, y = latti), data = location,
+                             alpha=0.6, col="orange",size = location$number*0.1)+
+                             geom_point(aes(x = longi, y = latti), data = location, 
+                                        alpha = 0.3, col = "blue", size = 1) +
+                             scale_size_continuous(range = range(location$number))
+  )
 
-USAMap +  geom_point(aes(x=longi, y = latti), data = location,
-             alpha=0.6, col="orange",size = location$number*0.1)+
-  geom_point(aes(x = longi, y = latti), data = location, 
-             alpha = 0.3, col = "blue", size = 1) +
-  scale_size_continuous(range = range(location$number))
-
-#compare within the state:
-
+}
+```
+draw the location map to compare between different dates.
+``````{r eval=FALSE}
+#draw the zoom one:
 statemap<-get_map(location='Texas',zoom=6,maptype="toner")
 statemap<-ggmap(statemap)
 
-texas<-filter(location,state=="TX"|state=="LA")
-statemap +  geom_point(aes(x=longi, y = latti), data = texas,
-                     alpha=0.2, col="yellow",size = texas$number*0.7)+
-  geom_point(aes(x = longi, y = latti), data = texas, 
-             alpha = 0.6, col = "red", size = 2) +
-  scale_size_continuous(range = range(texas$number))
+b<-0
+for (i in 4:8){
+  b<-b+1
+  location<-get(paste("loc_9",i,sep="_"))
+  texas<-filter(location,state=="TX"|state=="LA")
+  assign(paste("gb",b,sep=""),
+         statemap +  geom_point(aes(x=longi, y = latti), data = texas,
+                                alpha=0.4, col="yellow",size = texas$number*0.1)+
+                     geom_point(aes(x = longi, y = latti), data = texas, 
+                                alpha = 0.6, col = "red", size = 0.5) +
+                     theme(axis.title.x = element_text(size = 5),
+                           axis.text.x=element_text(size = 5),
+                           axis.title.y = element_text(size = 5),
+                           axis.text.y=element_text(size = 5),
+                           text = element_text(size = 10))+
+                     labs(title=paste("Sep/",i,"th",sep=""))+
+                     scale_size_continuous(range = range(texas$number)))
+                     
+}
 
+multiplot(gb1, gb2, gb3, gb4,gb5, cols=2)
 ```
 
 5.	Assumption checking
@@ -235,65 +354,154 @@ dim
 ```
 
 2.	Top 20 cities based on different dates
+2.1 format
 
-3.	Graphing
+2.2Graph
 
+```{r echo=FALSE,warning=FALSE,message=FALSE,error=FALSE}
+# Multiple plot function(from http://www.cookbook-r.com/Graphs/Multiple_graphs_on_one_page_(ggplot2)/)
+#
+# ggplot objects can be passed in ..., or to plotlist (as a list of ggplot objects)
+# - cols:   Number of columns in layout
+# - layout: A matrix specifying the layout. If present, 'cols' is ignored.
+#
+# If the layout is something like matrix(c(1,2,3,3), nrow=2, byrow=TRUE),
+# then plot 1 will go in the upper left, 2 will go in the upper right, and
+# 3 will go all the way across the bottom.
+#
+multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
+  library(grid)
+  
+  # Make a list from the ... arguments and plotlist
+  plots <- c(list(...), plotlist)
+  
+  numPlots = length(plots)
+  
+  # If layout is NULL, then use 'cols' to determine layout
+  if (is.null(layout)) {
+    # Make the panel
+    # ncol: Number of columns of plots
+    # nrow: Number of rows needed, calculated from # of cols
+    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
+                     ncol = cols, nrow = ceiling(numPlots/cols))
+  }
+  
+  if (numPlots==1) {
+    print(plots[[1]])
+    
+  } else {
+    # Set up the page
+    grid.newpage()
+    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+    
+    # Make each plot, in the correct location
+    for (i in 1:numPlots) {
+      # Get the i,j matrix positions of the regions that contain this subplot
+      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
+      
+      print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
+                                      layout.pos.col = matchidx$col))
+    }
+  }
+}
+```
+comparasion between different dates. The top ten cities
 
-```{r echo=FALSE}
-city_ystate<-read.csv("citys.csv")
-library(ggplot2)
-city_ystate$city <- factor(city_ystate$city, levels=unique(city_ystate$city))
-ggplot(head(city_ystate,20),aes(x=city,y=number,fill=state))+
-  geom_bar(stat = "identity")+
-  coord_flip()+
-  labs(title="city count")
+```{r echo=FALSE,warning=FALSE,message=FALSE,error=FALSE}
+
+for(i in c(4:8,29)){
+  
+  temp<-read.csv(paste("citys_9_",i,".csv",sep=""))
+  temp<-temp[ ,-1]
+  assign(paste("citys_9",i,sep="_"),temp)
+  
+}
+
+a<-0
+for (i in c(4:8,29)){
+  a<-a+1
+  city_ystate<-get(paste("citys_9",i,sep="_"))
+  city_ystate$city<-factor(city_ystate$city, levels=unique(city_ystate$city))
+  assign(paste("p",a,sep=""),ggplot(head(city_ystate,10),aes(x=city,y=freq,fill=state))+
+                             geom_bar(stat = "identity")+
+                             labs(title=paste("Sep/",i,"th",sep=""))+
+                             ylab("freqency")+
+                             theme(axis.title.x = element_text(size = 10),
+                                   axis.text.y=element_text(size = 5))+
+                             coord_flip())
+}
+
+multiplot(p1, p2, p3, p4,p5,p6, cols=2)
 
 ```
 Comparing with other state in the whole map:
 
 
-```{r echo=FALSE}
+```{r echo=FALSE,warning=FALSE,message=FALSE,error=FALSE}
 library(ggmap)
 library(mapproj)
-location<-read.csv("location.csv")
-#compare with the other state:
 
+#read in the datasete
+  for(i in c(4:8,29)){
+    
+    loc<-read.csv(paste("loc_9_",i,".csv",sep=""))
+    loc<-loc[ ,-1]
+    assign(paste("loc_9",i,sep="_"),loc)
+  }
+#draw the whole map one
 usa_center <- as.numeric(geocode("United States"))
 USAMap <- ggmap(get_googlemap(center=usa_center, zoom=4, maptype = "roadmap"), 
                 extent="normal")
+b<-0
+for (i in c(4:8,29)){
+  b<-b+1
+  location<-get(paste("loc_9",i,sep="_"))
+  assign(paste("g",b,sep=""),USAMap +  
+                             geom_point(aes(x=longi, y = latti), data = location,
+                                        alpha=0.6, col="orange",size = location$number*0.1)+
+                             geom_point(aes(x = longi, y = latti), data = location, 
+                                        alpha = 0.3, col = "blue", size = 1) +
+                             labs(title=paste("Sep/",i,"th",sep=""))+
+                             scale_size_continuous(range = range(location$number))
+  )
 
-USAMap +  geom_point(aes(x=longi, y = latti), data = location,
-             alpha=0.6, col="orange",size = location$number*0.1)+
-  geom_point(aes(x = longi, y = latti), data = location, 
-             alpha = 0.3, col = "blue", size = 1) +
-  scale_size_continuous(range = range(location$number))
+}
+multiplot(g1,g6)
 ```
 compare within the state of LA and TX
 
 
-```{r echo=FALSE}
+```{r echo=FALSE,warning=FALSE,message=FALSE,error=FALSE}
 
+#draw the zoom one:
 statemap<-get_map(location='Texas',zoom=6,maptype="toner")
 statemap<-ggmap(statemap)
 
-texas<-filter(location,location$state=="TX"|location$state=="LA")
-statemap +  geom_point(aes(x=longi, y = latti), data = texas,
-                     alpha=0.2, col="yellow",size = texas$number*0.7)+
-  geom_point(aes(x = longi, y = latti), data = texas, 
-             alpha = 0.6, col = "red", size = 2) +
-  scale_size_continuous(range = range(texas$number))
+b<-0
+for (i in 4:8){
+  b<-b+1
+  location<-get(paste("loc_9",i,sep="_"))
+  texas<-filter(location,state=="TX"|state=="LA")
+  assign(paste("gb",b,sep=""),
+         statemap +  geom_point(aes(x=longi, y = latti), data = texas,
+                                alpha=0.4, col="yellow",size = texas$number*0.1)+
+                     geom_point(aes(x = longi, y = latti), data = texas, 
+                                alpha = 0.6, col = "red", size = 0.5) +
+                     theme(axis.title.x = element_text(size = 5),
+                           axis.text.x=element_text(size = 5),
+                           axis.title.y = element_text(size = 5),
+                           axis.text.y=element_text(size = 5),
+                           text = element_text(size = 10))+
+                     labs(title=paste("Sep/",i,"th",sep=""))+
+                     scale_size_continuous(range = range(texas$number)))
+                     
+}
+
+multiplot(gb1, gb2, gb3, gb4,gb5, cols=2)
 
 ```
 
-
-
-
-4.	In the map
-
-
-
-
-5.	Checking the assumption
+5.	Checking the assumption using statistical method:
 
 
 
