@@ -310,8 +310,14 @@ for (i in c(4:8,29)){
 
 }
 ```
+
+
+
 draw the location map to compare between different dates.
-``````{r eval=FALSE}
+
+
+
+```{r eval=FALSE}
 #draw the zoom one:
 statemap<-get_map(location='Texas',zoom=6,maptype="toner")
 statemap<-ggmap(statemap)
@@ -338,6 +344,7 @@ for (i in 4:8){
 
 multiplot(gb1, gb2, gb3, gb4,gb5, cols=2)
 ```
+
 
 5.	Assumption checking
 In order to exclude the influence of the city and total population of the number of tweets, I also pull another day’s data(Sep 30th) as the baseline data, to access whether there is pattern change based on the assumption.
