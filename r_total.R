@@ -172,7 +172,7 @@ y_state<-filter(cHH9_4,state!="USA"
 
 state_num<-summary(y_state$state,maxsum = 500)
 
-y_state_1<-filter(y_state,state=="TX"|state=="TEXAS")
+y_state_1<-filter(y_state,state=="TX"|state=="TEXAS"|state=="TEXASUSA")
 y_state_2<-filter(y_state,state=="LA"|state=="LOUISIANA")
 y_state_3<-filter(y_state,state=="MA"|state=="MASSACHUSETTS")
 y_state_4<-filter(y_state,state=="NV"|state=="NEVADA")
@@ -275,4 +275,56 @@ statemap +  geom_point(aes(x=longi, y = latti), data = texas,
              alpha = 0.6, col = "red", size = 2) +
   scale_size_continuous(range = range(texas$number))
 
+#statiscal inference:
+#extract first 20 cities:
+
+for (i in c(4:8,29)){
+  
+  head_city<-head(get(paste("citys_9",i,sep="_")),40)
+  head_city$freq<-head_city[ ,"number"]/sum(head_city[ ,"number"])
+  assign(paste("head",i,sep=""),head_city)
+}
+for (i in 4:8){
+  
+  head<-get(paste("head",i,sep=""))
+  head_re<-merge(x=head,y=head29,by="city",all.x=TRUE)
+  head_cl<-head_re %>%
+    select(city,freq.x,freq.y,state.x) %>%
+    arrange(desc(freq.x))
+  head_cl[is.na(head_cl)]<-0
+  head_cl<-head_cl %>%
+    mutate(freq_ad=freq.x-freq.y) %>%
+    arrange(desc(freq_ad))
+  write.csv(head_cl,paste("adcity_9_",i,".csv",sep=""))
+}
+
+head4_re<-merge(x=head4,y=head29,by="city",all.x=TRUE)
+head4_cl<-head4_re %>%
+          select(city,freq.x,freq.y,state.x) %>%
+          arrange(desc(freq.x))
+head4_cl[is.na(head4_cl)]<-0
+head4_cl<-head4_cl %>%
+          mutate(freq_ad=freq.x-freq.y) %>%
+          arrange(desc(freq_ad))
+
+head4_cl$freq_ad<-head4_cl[ ,"freq.x"]-head4_cl[ ,"freq.y"]
+          
+
+
+#draw the whole map one
+usa_center <- as.numeric(geocode("United States"))
+USAMap <- ggmap(get_googlemap(center=usa_center, zoom=4, maptype = "roadmap"), 
+                extent="normal")
+b<-0
+for (i in 4:8){
+  b<-b+1
+  location<-get(paste("loc_9",i,sep="_"))
+  assign(paste("g",b,sep=""),USAMap +  geom_point(aes(x=longi, y = latti), data = location,
+                                                  alpha=0.6, col="orange",size = location$number*0.1)+
+           geom_point(aes(x = longi, y = latti), data = location, 
+                      alpha = 0.3, col = "blue", size = 1) +
+           scale_size_continuous(range = range(location$number))
+  )
+  
+}
 

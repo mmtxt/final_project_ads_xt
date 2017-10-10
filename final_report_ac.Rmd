@@ -174,7 +174,7 @@ for(i in c(4:8,29)){
 ```
 4.	Graphing:
 The graphing process containing several different steps. 
-4.1	basic row data exploration. Graphing the first 20 cities that have the most frequency of showing for different dates using ggplot (geom_bar) and for the reference dates, too. The code used showed below, also, take day 9-4 as an example
+4.1	Basic row data exploration. Graphing the first 20 cities that have the most frequency of showing for different dates using ggplot (geom_bar) and for the reference dates, too. Also, the multiplot function from the internet helped to merge all the graph together.
 
 ```{r eval=FALSE}
 #read in the dataset
@@ -247,78 +247,91 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
 
 ```
 
-PLOT THE GRAPHT:
+PLOT THE GRAPH:
 ``` {r eval=FALSE}
 multiplot(p1, p2, p3, p4,p5,p6, cols=2)
 ```
 
-4.2	using ggmap package and ggplot to graph the area on the map as to visualize the data.
-4.2.1 first, use the ggmap get the geo information from the internet, and save the data into a new dataset
+
+4.2 Exclude other confounders using the data 9/29 as reference. 
+In order to exclude other confoundings that may have effect on twitter number, I extract the twitter date at Sep 29th. Since September 29th is the date almost a month away from the hit of hurricane Harvey, we can suppose that the twitter number in that date can represent usual twitter number. 
+I get the frequency of each city that shows up in the twitter for the top 40 cities each day from Sep 4th to Sep 8th and Sep 29th. And then, using the frequency in the hurricane days to subtract the frequency of none hurricane days and get the absolute differences.
+The reason that I didn’t use relative risk as indicator is that some cities are in hurricane hit dates are not present in non-hurricane hit dates. These cities have the frequency of 0 and we cannot use them as dominator.
+After we get the absolute difference, that is the one indicator I would use for the following step, including showing them on the map.
+The code I use is listed below:
+
+```{r eval=FALSE}
+for (i in c(4:8,29)){
+  
+  head_city<-head(get(paste("citys_9",i,sep="_")),40)
+  head_city$freq<-head_city[ ,"number"]/sum(head_city[ ,"number"])
+  assign(paste("head",i,sep=""),head_city)
+}
+for (i in 4:8){
+  
+  head<-get(paste("head",i,sep=""))
+  head_re<-merge(x=head,y=head29,by="city",all.x=TRUE)
+  head_cl<-head_re %>%
+    select(city,freq.x,freq.y,state.x) %>%
+    arrange(desc(freq.x))
+  head_cl[is.na(head_cl)]<-0
+  head_cl<-head_cl %>%
+    mutate(freq_ad=freq.x-freq.y) %>%
+    arrange(desc(freq_ad))
+  write.csv(head_cl,paste("adcity_9_",i,".csv",sep=""))
+}
+
+
+```
+
+4.3	using ggmap package and ggplot to graph the area on the map as to visualize the data.
+
+4.3.1 first, use the ggmap get the geo information from the internet, and save the data into a new dataset
 ```{r eval=FALSE}
 #big one
 library(ggmap)
 library(mapproj)
 
+#read in the dataset:
+for (i in 4:8){
+  assign(paste("adcity_9_",i,sep=""),read.csv(paste("adcity_9_",i,".csv",sep=""))[,-1])
+}
 
 #fit geo information:
-for (i in c(4:8,29)){
-  location<-get(paste("citys_9",i,sep="_"))
+for (i in 4:8){
+  location<-get(paste("adcity_9",4,sep="_"))
+  
   location$longi<-NA
   location$latti<-NA
 
   for(a in 1:nrow(location)){
-    location[a, 6:7] <- geocode(as.character(location[a,2])) %>% as.numeric
+    location[a, 6:7] <- geocode(as.character(location[a,"city"])) %>% as.numeric
   }
   
   #for those not fitted in the first loop
   for(b in 1:nrow(location)){
-    if(is.na(location[b, 4])){
-      location[b, 4:5] <- geocode(as.character(location[i,2])) %>% as.numeric
+    if(is.na(location[b, 7])){
+      location[b, 6:7] <- geocode(as.character(location[i,"city"])) %>% as.numeric
     }
     else{}
   }
   location<-filter(location,!is.na(longi))
   location<-filter(location,longi<=-60&longi>=-140&latti>=20&latti<=50)
-  assign(paste("citys_9",i,sep="_"),location)
+  assign(paste("adcity_9",i,sep="_"),location)
   write.csv(location,paste("loc_9_",i,".csv",sep=""))
 } 
 ```
-for the big map, comparing 9/4 with 9/29
-``````{r eval=FALSE}
+
+4.3.2 Using the ggmap package, showing the result. The code I used is as below
+
+```{r eval=FALSE}
 #read in the datasete
-  for(i in c(4:8,29)){
+  for(i in 4:8) {
     
     loc<-read.csv(paste("loc_9_",i,".csv",sep=""))
     loc<-loc[ ,-1]
     assign(paste("loc_9",i,sep="_"),loc)
   }
-#draw the whole map one
-usa_center <- as.numeric(geocode("United States"))
-USAMap <- ggmap(get_googlemap(center=usa_center, zoom=4, maptype = "roadmap"), 
-                extent="normal")
-b<-0
-for (i in c(4:8,29)){
-  b<-b+1
-  location<-get(paste("loc_9",i,sep="_"))
-  assign(paste("g",b,sep=""),USAMap +  
-                             geom_point(aes(x=longi, y = latti), data = location,
-                             alpha=0.6, col="orange",size = location$number*0.1)+
-                             geom_point(aes(x = longi, y = latti), data = location, 
-                                        alpha = 0.3, col = "blue", size = 1) +
-                             scale_size_continuous(range = range(location$number))
-  )
-
-}
-```
-
-
-
-draw the location map to compare between different dates.
-
-
-
-```{r eval=FALSE}
-#draw the zoom one:
 statemap<-get_map(location='Texas',zoom=6,maptype="toner")
 statemap<-ggmap(statemap)
 
@@ -329,7 +342,7 @@ for (i in 4:8){
   texas<-filter(location,state=="TX"|state=="LA")
   assign(paste("gb",b,sep=""),
          statemap +  geom_point(aes(x=longi, y = latti), data = texas,
-                                alpha=0.4, col="yellow",size = texas$number*0.1)+
+                                alpha=0.4, col="yellow",size = texas$freq_ad*0.1)+
                      geom_point(aes(x = longi, y = latti), data = texas, 
                                 alpha = 0.6, col = "red", size = 0.5) +
                      theme(axis.title.x = element_text(size = 5),
@@ -341,13 +354,18 @@ for (i in 4:8){
                      scale_size_continuous(range = range(texas$number)))
                      
 }
-
 multiplot(gb1, gb2, gb3, gb4,gb5, cols=2)
 ```
 
 
-5.	Assumption checking
-In order to exclude the influence of the city and total population of the number of tweets, I also pull another day’s data(Sep 30th) as the baseline data, to access whether there is pattern change based on the assumption.
+5.	Statically comparing and assumption checking
+
+5.1	comparing the frequency of Maryland cities showed up and TX/LA cities showed up. Test the hypothesis of whether most hit area got the most tweets number.
+
+
+5.2	Comparing the frequency of hurricane dates and non-hurricane dates. Both 5.1 and 5.2 are done by the adjusting. If after adjusting, there are more TX/LA cities shows up than before adjusting, it would support the assumption
+
+5.3	Using the number difference between reference date and hurricane date as the new number to identify the most several hurt areas. 
 
 
 #result:
@@ -360,10 +378,7 @@ colnames(dim)[1]<-"dates"
 dim
 ```
 
-2.	Top 20 cities based on different dates
-2.1 format
-
-2.2Graph
+The Bar plot before adjusting among different cities is as below:
 
 ```{r echo=FALSE,warning=FALSE,message=FALSE,error=FALSE}
 # Multiple plot function(from http://www.cookbook-r.com/Graphs/Multiple_graphs_on_one_page_(ggplot2)/)
@@ -412,7 +427,7 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
   }
 }
 ```
-comparasion between different dates. The top ten cities
+
 
 ```{r echo=FALSE,warning=FALSE,message=FALSE,error=FALSE}
 
@@ -441,44 +456,20 @@ for (i in c(4:8,29)){
 multiplot(p1, p2, p3, p4,p5,p6, cols=2)
 
 ```
-Comparing with other state in the whole map:
+
+
+2. Basic map after adjusting comparing different dates:
+
 
 
 ```{r echo=FALSE,warning=FALSE,message=FALSE,error=FALSE}
-library(ggmap)
-library(mapproj)
 
-#read in the datasete
-  for(i in c(4:8,29)){
+  for(i in 4:8) {
     
     loc<-read.csv(paste("loc_9_",i,".csv",sep=""))
     loc<-loc[ ,-1]
     assign(paste("loc_9",i,sep="_"),loc)
   }
-#draw the whole map one
-usa_center <- as.numeric(geocode("United States"))
-USAMap <- ggmap(get_googlemap(center=usa_center, zoom=4, maptype = "roadmap"), 
-                extent="normal")
-b<-0
-for (i in c(4:8,29)){
-  b<-b+1
-  location<-get(paste("loc_9",i,sep="_"))
-  assign(paste("g",b,sep=""),USAMap +  
-                             geom_point(aes(x=longi, y = latti), data = location,
-                                        alpha=0.6, col="orange",size = location$number*0.1)+
-                             geom_point(aes(x = longi, y = latti), data = location, 
-                                        alpha = 0.3, col = "blue", size = 1) +
-                             labs(title=paste("Sep/",i,"th",sep=""))+
-                             scale_size_continuous(range = range(location$number))
-  )
-
-}
-multiplot(g1,g6)
-```
-compare within the state of LA and TX
-
-
-```{r echo=FALSE,warning=FALSE,message=FALSE,error=FALSE}
 
 #draw the zoom one:
 statemap<-get_map(location='Texas',zoom=6,maptype="toner")
@@ -488,10 +479,10 @@ b<-0
 for (i in 4:8){
   b<-b+1
   location<-get(paste("loc_9",i,sep="_"))
-  texas<-filter(location,state=="TX"|state=="LA")
+  texas<-filter(location,state.x=="TX"|state.x=="LA")
   assign(paste("gb",b,sep=""),
          statemap +  geom_point(aes(x=longi, y = latti), data = texas,
-                                alpha=0.4, col="yellow",size = texas$number*0.1)+
+                                alpha=0.4, col="yellow",size = texas$freq_ad*200)+
                      geom_point(aes(x = longi, y = latti), data = texas, 
                                 alpha = 0.6, col = "red", size = 0.5) +
                      theme(axis.title.x = element_text(size = 5),
@@ -503,20 +494,68 @@ for (i in 4:8){
                      scale_size_continuous(range = range(texas$number)))
                      
 }
-
 multiplot(gb1, gb2, gb3, gb4,gb5, cols=2)
+```
+
+3.	Assumption checking:
+
+3.1	I am going to use bar plot to show each date, the top 10 cities before adjusting and after adjusting to test the hypothesis 1 and 2.The following plot is the result after adjusting
+
+```{r echo=FALSE,warning=FALSE,message=FALSE,error=FALSE}
+for(i in 4:8){
+  assign(paste("adcity_9_",i,sep=""),read.csv(paste("adcity_9_",i,".csv",sep=""))[ ,-1])
+}
+
+b<-0
+for (i in c(4:8)){
+  b<-b+1
+  city_ystate<-get(paste("adcity_9",i,sep="_"))
+  city_ystate$city<-factor(city_ystate$city, levels=unique(city_ystate$city))
+  assign(paste("e",b,sep=""),ggplot(head(city_ystate,10),aes(x=city,y=freq_ad,fill=state.x))+
+           geom_bar(stat = "identity")+
+           labs(title=paste("Sep/",i,"th","_adjust",sep=""))+
+           ylab("freqency")+
+           theme(axis.title.x = element_text(size = 10),
+                 axis.text.y=element_text(size = 5))+
+           coord_flip())
+}
+
+multiplot(e1,e2,e3,e4,e5,cols=2)
+```
+From the bar plot, we could see clear difference between adjustment and non-adjustment data. Taking September 4th as an example, before adjustment, there are 3 cities in non-hurricane area showing up in the first 20 cities, but after adjustment, there is no city. It shows that, there is a difference between the tweet pattern before and after the hurricane hurt.
+
+
+3.2 Identify the most serious hurt area:
+From the result below, the city that have the most tweets after adjustment is Huston, Austin, other cities changed a lot base on different dates. 
+
+```{r echo=FALSE,warning=FALSE,message=FALSE,error=FALSE}
+
+for (i in 4:8){
+  adrow<-get(paste("adcity_9_",i,sep=""))
+  adrow<-adrow$city[c(1:20)]
+  assign(paste("adrow",i,sep=""),as.character(adrow))
+}
+
+#first step data visualing:
+city<-c(adrow4,adrow5,adrow6,adrow7,adrow8)
+col<-c("citys","date")
+row<-c("9-4","9-5","9-6","9-7","9-8")
+city_max<-matrix(city,byrow = FALSE,ncol=5)
+colnames(city_max)<-row
+city_max
 
 ```
 
-5.	Checking the assumption using statistical method:
-
-
-
+#Discussion.
+In this project, I predict the most hurt area by counting the number of tweets sending from each city. From the result, Huston and Austin get the most frequency of showing up and this is the same as what I found from the actual damage information from the internet. However, there are few limitations about this analysis.
+As the result, although that the results are most similar to the actual serious hurt area, there is an exception. Dallas, which is also serious hurt, not shown itself in the map. In order to make sure why this happen, I check again the original dataset before the adjustment, and there it is, always in the best 10 of the city list. So, what happened is, it shows up in high frequency on date 9/29, too. And after the subtraction, it disappear. This might happen by on the specific day of 9/29, people in Dallas accidently tweet a lot by some reason.
+However, by using the twitter, it can give a basic map of what is happening across the country, but not that precisely. 
 
 
 # Data source:
 
 * [twitter](https://twitter.com/)
 * [twitterR package](http://geoffjentry.hexdump.org/twitteR.pdf)
+* [multigraph](http://www.cookbook-r.com/Graphs/Multiple_graphs_on_one_page_(ggplot2)/) 
 
 
