@@ -61,3 +61,5 @@ HH9_29$location[HH9_29$location==""]<-NA
 HH9_29$location<-as.factor(HH9_29$location)
 cHH9_29<-filter(HH9_29,!is.na(location))
 
+if (!require("devtools")) install.packages("devtools")
+devtools::install_github("rstudio/rmarkdown")
