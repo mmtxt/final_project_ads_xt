@@ -1,5 +1,33 @@
-#loop one
+---
+title: "Hurricane Harvey in America "
+author: xueting tao
+output: pdf_document
+---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r eval=FALSE}
+#just for reference use
+#getting the data: install twitterR since install.pacakge("twitterR")is not avialble
+#let me try another one
+install.packages(c("devtools", "rjson", "bit64", "httr"))
+#follow the instruction and restart R
+library(devtools)
+install_github("geoffjentry/twitteR")
+
+library(twitteR)
+setup_twitter_oauth("API key", 
+                    "API secret",
+                    "Access token",
+                    "Access secret")
+#selection:
+1
+
+#load useful package
 library(dplyr)
 library(stringr)
 library(rebus)
@@ -9,19 +37,52 @@ library(ggmap)
 library(mapproj)
 library(twitteR)
 
-#read in database
-assign(paste("HH9",i,sep="_"),
-       read.csv("https://www.dropbox.com/s/26fciujm2iw3umu/9-4.csv?dl=0"))
+#start getting the data
+#data at 9-4
+sample_9_4<-searchTwitter('#HurricaneHarvey until:2017-9-5', n=10000)
+#data at 9-5
+sample_9_5<-searchTwitter('#HurricaneHarvey until:2017-9-6', n=10000)
+#data at 9-6
+sample_9_6<-searchTwitter('#HurricaneHarvey until:2017-9-7', n=10000)
+#data at 9-7
+sample_9_7<-searchTwitter('#HurricaneHarvey until:2017-9-8', n=10000)
+#data at 9-8
+sample_9_8<-searchTwitter('#HurricaneHarvey until:2017-9-9', n=10000)
+HH9_4<-twListToDF(sample_9_4)
+HH9_5<-twListToDF(sample_9_5)
+HH9_6<-twListToDF(sample_9_6)
+HH9_7<-twListToDF(sample_9_7)
+HH9_8<-twListToDF(sample_9_8)
+
+#collect correction data(using a as a key word to search)
+HH9_29<-searchTwitter('a until:2017-9-30 ',n=10000)
+HH9_29<-twListToDF(HH9_29)
+```
 
 
+```{r }
+#load useful package
+library(dplyr)
+library(stringr)
+library(rebus)
+library(tidyr)
+library(ggplot2)
+library(ggmap)
+library(mapproj)
+library(twitteR)
 
-
+#In order to make sure about reproduction, let's just use my data
+#first, you need to download the data from github, put them in the defult dictionary, read in them
 for(i in c(4:8,29)){
   assign(paste("HH9",i,sep="_"),
-         read.csv(paste("https://www.dropbox.com/sh/i9lccg7shxsscqe/AAD6DJ4Nuy9o6GyTLM4UiEzLa?dl=0/","9-",i,".csv",sep="")))
+         read.csv(paste("9-",i,".csv",sep="")))
   
 }
-#select data that have location information and save as cHHs
+
+#start working:
+# Delete lines without location information in the original dataset and create new dataset called cHHs.
+#select data that have location information
+
 for(i in c(4:8,29)){
  cHHs<-get(paste("HH9",i,sep="_"))
  cHHs$location[cHHs$location==""]<-NA  
@@ -31,7 +92,7 @@ for(i in c(4:8,29)){
  assign(paste("cHH9",i,sep="_"),cHHs)
  
 }
-#raw data
+#explore the raw data:
 for (i in c(4:8,29)){
   dim<-get(paste("cHH9",i,sep="_"))
   assign(paste("dim",i,sep=""),dim(dim))
@@ -45,6 +106,11 @@ rownames(dim_max)<-row
 colnames(dim_max)<-col
 (dim_max<-data.frame(dim_max))
 write.csv(dim_max,"dim.csv")
+dim<-read.csv("dim.csv")
+colnames(dim)[1]<-"dates"
+dim
+
+#In order to continue analysis, I need first clean the format of the data, seperate the location information by city and state, showing all the charachers in upper form and cleaning the spaces. After that, I seperate the dataset into two part, the one with useful state information and the one without useful state information.
 
 #seperate the location information into state and city,export those data with state information
 for(i in c(4:8,29)){
@@ -57,7 +123,11 @@ for(i in c(4:8,29)){
   assign(paste("cHH9",i,sep="_"),temp)
 }
 
-#extract number of each city and extract the dataset(STATE INCLUDE TX,LA. MA AND NV as reference)
+
+
+
+# I calculated the time each city shows in TX and LA, both in the data that containing a state information and without state information. Add state information to the final dataframe
+
 
 for(i in c(4:8,29)){
   
@@ -103,8 +173,12 @@ for(i in c(4:8,29)){
   write.csv(city_ystate,paste("citys_9_",i,".csv",sep=""))
   
 }
-#read in the dataset
 
+#Graphing:
+#The graphing process containing several different steps. 
+#	Basic row data exploration. Graphing the first 20 cities that have the most frequency of showing for different dates using ggplot (geom_bar) and for the reference dates, too. Also, the multiplot function from the internet helped to merge all the graph together.
+
+#read in the dataset
 for(i in c(4:8,29)){
   
   temp<-read.csv(paste("citys_9_",i,".csv",sep=""))
@@ -112,10 +186,68 @@ for(i in c(4:8,29)){
   assign(paste("citys_9",i,sep="_"),temp)
   
 }
-#statiscal inference:
+#raw data without adjusting
+a<-0
+for (i in c(4:8,29)){
+  a<-a+1
+  city_ystate<-get(paste("citys_9",i,sep="_"))
+  city_ystate$city<-factor(city_ystate$city, levels=unique(city_ystate$city))
+  assign(paste("p",a,sep=""),ggplot(head(city_ystate,20),aes(x=city,y=freq,fill=state))+
+         geom_bar(stat = "identity")+
+         labs(title=paste("Sep/",i,"th",sep=""))+
+         coord_flip())
+}
+#multiplot function:http://www.cookbook-r.com/Graphs/Multiple_graphs_on_one_page_(ggplot2)/
+#
+# ggplot objects can be passed in ..., or to plotlist (as a list of ggplot objects)
+# - cols:   Number of columns in layout
+# - layout: A matrix specifying the layout. If present, 'cols' is ignored.
+#
+# If the layout is something like matrix(c(1,2,3,3), nrow=2, byrow=TRUE),
+# then plot 1 will go in the upper left, 2 will go in the upper right, and
+# 3 will go all the way across the bottom.
+#
+multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
+  library(grid)
+
+  # Make a list from the ... arguments and plotlist
+  plots <- c(list(...), plotlist)
+
+  numPlots = length(plots)
+
+  # If layout is NULL, then use 'cols' to determine layout
+  if (is.null(layout)) {
+    # Make the panel
+    # ncol: Number of columns of plots
+    # nrow: Number of rows needed, calculated from # of cols
+    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
+                     ncol = cols, nrow = ceiling(numPlots/cols))
+  }
+
+ if (numPlots==1) {
+    print(plots[[1]])
+
+  } else {
+    # Set up the page
+    grid.newpage()
+    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+
+    # Make each plot, in the correct location
+    for (i in 1:numPlots) {
+      # Get the i,j matrix positions of the regions that contain this subplot
+      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
+
+      print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
+                                      layout.pos.col = matchidx$col))
+    }
+  }
+}
+##plot together
+multiplot(p1, p2, p3, p4,p5,p6, cols=2)
+
+
 #raw data adjusting:
 #extract first 40 cities and adjust them with 9_29:
-
 for (i in c(4:8,29)){
   
   head_city<-head(get(paste("citys_9",i,sep="_")),40)
@@ -137,30 +269,7 @@ for (i in 4:8){
   write.csv(head_cl,paste("adcity_9_",i,".csv",sep=""))
 }
 
-
-#raw data without adjusting
-#make sure the city list from the smallest to highest
-a<-0
-for (i in c(4:8,29)){
-  a<-a+1
-  city_ystate<-get(paste("citys_9",i,sep="_"))
-  city_ystate$city<-factor(city_ystate$city, levels=unique(city_ystate$city))
-  assign(paste("p",a,sep=""),ggplot(head(city_ystate,10),aes(x=city,y=freq,fill=state))+
-         geom_bar(stat = "identity")+
-         labs(title=paste("Sep/",i,"th",sep=""))+
-           ylab("freqency")+
-          theme(axis.title.x = element_text(size = 10),
-                axis.text.y=element_text(size = 5))+
-           coord_flip())
-}
-
-p1
-multiplot(p1, p2, p3, p4,p5,p6, cols=2)
-
-#data with the adjusting
-
-#ggmap
-#big one
+#using ggmap package and ggplot to graph the area on the map as to visualize the data.
 library(ggmap)
 library(mapproj)
 
@@ -171,7 +280,7 @@ for (i in 4:8){
 
 #fit geo information:
 for (i in 4:8){
-  location<-get(paste("adcity_9",i,sep="_"))
+  location<-get(paste("adcity_9",4,sep="_"))
   
   location$longi<-NA
   location$latti<-NA
@@ -183,7 +292,7 @@ for (i in 4:8){
   #for those not fitted in the first loop
   for(b in 1:nrow(location)){
     if(is.na(location[b, 7])){
-      location[b, 6:7] <- geocode(as.character(location[b,"city"])) %>% as.numeric
+      location[b, 6:7] <- geocode(as.character(location[i,"city"])) %>% as.numeric
     }
     else{}
   }
@@ -193,6 +302,9 @@ for (i in 4:8){
   write.csv(location,paste("loc_9_",i,".csv",sep=""))
 } 
 
+
+# Using the ggmap package, showing the result. The code I used is as below
+
 #read in the datasete
   for(i in 4:8) {
     
@@ -200,8 +312,6 @@ for (i in 4:8){
     loc<-loc[ ,-1]
     assign(paste("loc_9",i,sep="_"),loc)
   }
-
-#draw the zoom one:
 statemap<-get_map(location='Texas',zoom=6,maptype="toner")
 statemap<-ggmap(statemap)
 
@@ -209,10 +319,10 @@ b<-0
 for (i in 4:8){
   b<-b+1
   location<-get(paste("loc_9",i,sep="_"))
-  texas<-filter(location,state.x=="TX"|state.x=="LA")
+  texas<-filter(location,state=="TX"|state=="LA")
   assign(paste("gb",b,sep=""),
          statemap +  geom_point(aes(x=longi, y = latti), data = texas,
-                                alpha=0.4, col="yellow",size = texas$freq_ad*200)+
+                                alpha=0.4, col="yellow",size = texas$freq_ad*0.1)+
                      geom_point(aes(x = longi, y = latti), data = texas, 
                                 alpha = 0.6, col = "red", size = 0.5) +
                      theme(axis.title.x = element_text(size = 5),
@@ -224,38 +334,22 @@ for (i in 4:8){
                      scale_size_continuous(range = range(texas$number)))
                      
 }
-gb1
 multiplot(gb1, gb2, gb3, gb4,gb5, cols=2)
-gb4
 
-#the data before adjustment:
-#read in the dataset
+
+
+#	Assumption checking:
+
 for(i in 4:8){
   assign(paste("adcity_9_",i,sep=""),read.csv(paste("adcity_9_",i,".csv",sep=""))[ ,-1])
 }
-
-
-a<-0
-for (i in c(4:8,29)){
-  a<-a+1
-  city_ystate<-get(paste("citys_9",i,sep="_"))
-  city_ystate$city<-factor(city_ystate$city, levels=unique(city_ystate$city))
-  assign(paste("p",a,sep=""),ggplot(head(city_ystate,20),aes(x=city,y=freq,fill=state))+
-           geom_bar(stat = "identity")+
-           labs(title=paste("Sep/",i,"th",sep=""))+
-           ylab("freqency")+
-           theme(axis.title.x = element_text(size = 10),
-                 axis.text.y=element_text(size = 5))+
-           coord_flip())
-}
-p1
 
 b<-0
 for (i in c(4:8)){
   b<-b+1
   city_ystate<-get(paste("adcity_9",i,sep="_"))
   city_ystate$city<-factor(city_ystate$city, levels=unique(city_ystate$city))
-  assign(paste("e",b,sep=""),ggplot(head(city_ystate,20),aes(x=city,y=freq_ad,fill=state.x))+
+  assign(paste("e",b,sep=""),ggplot(head(city_ystate,10),aes(x=city,y=freq_ad,fill=state.x))+
            geom_bar(stat = "identity")+
            labs(title=paste("Sep/",i,"th","_adjust",sep=""))+
            ylab("freqency")+
@@ -263,44 +357,12 @@ for (i in c(4:8)){
                  axis.text.y=element_text(size = 5))+
            coord_flip())
 }
-e1
+
 multiplot(e1,e2,e3,e4,e5,cols=2)
 
 
-#exclude Huston and Austin.
-for (i in c(4:8)){
-  city_ex<-get(paste("adcity_9_",i,sep=""))
-  city_ex<-city_ex[-c(1:2), ]
-  assign(paste("cityex9_",i,sep=""),city_ex)
-}
-#draw the map again
-statemap<-get_map(location='Texas',zoom=6,maptype="toner")
-statemap<-ggmap(statemap)
+# Identify the most serious hurt area:
 
-b<-0
-for (i in 4:8){
-  b<-b+1
-  location<-get(paste("cityex9_",i,sep=""))
-  texas<-filter(location,state.x=="TX"|state.x=="LA")
-  assign(paste("gb",b,sep=""),
-         statemap +  geom_point(aes(x=longi, y = latti), data = texas,
-                                alpha=0.4, col="yellow",size = texas$freq_ad*1000)+
-           geom_point(aes(x = longi, y = latti), data = texas, 
-                      alpha = 0.6, col = "red", size = 0.5) +
-           theme(axis.title.x = element_text(size = 5),
-                 axis.text.x=element_text(size = 5),
-                 axis.title.y = element_text(size = 5),
-                 axis.text.y=element_text(size = 5),
-                 text = element_text(size = 10))+
-           labs(title=paste("Sep/",i,"th",sep=""))+
-           scale_size_continuous(range = range(texas$number)))
-  
-}
-gb1
-multiplot(gb1, gb2, gb3, gb4,gb5, cols=2)
-gb4
-#ten high cities based on different dates:
-#raw data
 for (i in 4:8){
   adrow<-get(paste("adcity_9_",i,sep=""))
   adrow<-adrow$city[c(1:20)]
@@ -313,9 +375,7 @@ col<-c("citys","date")
 row<-c("9-4","9-5","9-6","9-7","9-8")
 city_max<-matrix(city,byrow = FALSE,ncol=5)
 colnames(city_max)<-row
-write.csv(city_max,"city.csv")
+city_max
 
-
-
-
+```
 
