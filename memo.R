@@ -63,3 +63,8 @@ cHH9_29<-filter(HH9_29,!is.na(location))
 
 if (!require("devtools")) install.packages("devtools")
 devtools::install_github("rstudio/rmarkdown")
+
+
+
+#git commit under shell
+git add --all && git commit -m "comment"
