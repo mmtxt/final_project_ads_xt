@@ -71,10 +71,19 @@ library(mapproj)
 library(twitteR)
 
 #In order to make sure about reproduction, let's just use my data
-#first, you need to download the data from github, put them in the defult dictionary, read in them
+#download the data from the dropbox
+
+download.file("https://www.dropbox.com/s/26fciujm2iw3umu/9-4.csv?dl=1","9-4.csv")
+download.file("https://www.dropbox.com/s/h58yrmd1cy0mwgb/9-5.csv?dl=1","9-5.csv")
+download.file("https://www.dropbox.com/s/vzselkdqr597ykk/9-6.csv?dl=1","9-6.csv")
+download.file("https://www.dropbox.com/s/l4i5ufbxemu241b/9-7.csv?dl=1","9-7.csv")
+download.file("https://www.dropbox.com/s/fb2hv24etxytxgl/9-8.csv?dl=1","9-8.csv")
+download.file("https://www.dropbox.com/s/xqb3bqnmv87olh0/9-29.csv?dl=1","9-9.csv")
+
+#read in the data:
 for(i in c(4:8,29)){
   assign(paste("HH9",i,sep="_"),
-         read.csv(paste("9-",i,".csv",sep="")))
+         read.csv(paste("9-",i,".csv",sep=""))[,-1])
   
 }
 

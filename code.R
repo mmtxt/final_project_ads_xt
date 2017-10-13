@@ -10,15 +10,23 @@ library(mapproj)
 library(twitteR)
 
 #read in database
-assign(paste("HH9",i,sep="_"),
-       read.csv("https://www.dropbox.com/s/26fciujm2iw3umu/9-4.csv?dl=0"))
 
+library(curl)
+#zip file? how to do this?
+download.file("https://www.dropbox.com/sh/i9lccg7shxsscqe/AAD6DJ4Nuy9o6GyTLM4UiEzLa?dl=1","file.zip",mode="wb")
+unzip(zipfile="file.zip",overwrite = TRUE)
 
+download.file("https://www.dropbox.com/s/26fciujm2iw3umu/9-4.csv?dl=1","9-4.csv")
+download.file("https://www.dropbox.com/s/h58yrmd1cy0mwgb/9-5.csv?dl=1","9-5.csv")
+download.file("https://www.dropbox.com/s/vzselkdqr597ykk/9-6.csv?dl=1","9-6.csv")
+download.file("https://www.dropbox.com/s/l4i5ufbxemu241b/9-7.csv?dl=1","9-7.csv")
+download.file("https://www.dropbox.com/s/fb2hv24etxytxgl/9-8.csv?dl=1","9-8.csv")
+download.file("https://www.dropbox.com/s/xqb3bqnmv87olh0/9-29.csv?dl=1","9-9.csv")
 
 
 for(i in c(4:8,29)){
   assign(paste("HH9",i,sep="_"),
-         read.csv(paste("https://www.dropbox.com/sh/i9lccg7shxsscqe/AAD6DJ4Nuy9o6GyTLM4UiEzLa?dl=0/","9-",i,".csv",sep="")))
+         read.csv(paste("9-",i,".csv",sep=""))[,-1])
   
 }
 #select data that have location information and save as cHHs
