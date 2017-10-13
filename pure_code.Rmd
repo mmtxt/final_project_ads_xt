@@ -9,7 +9,6 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
-
 ```{r eval=FALSE}
 #just for reference use
 #getting the data: install twitterR since install.pacakge("twitterR")is not avialble
