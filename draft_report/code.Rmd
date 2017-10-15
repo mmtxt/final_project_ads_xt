@@ -528,7 +528,7 @@ for (i in c(4:8)){
   city_ystate$city<-factor(city_ystate$city, levels=unique(city_ystate$city))
   assign(paste("e",b,sep=""),ggplot(head(city_ystate,10),aes(x=city,y=freq_ad,fill=state.x))+
            geom_bar(stat = "identity")+
-           labs(title=paste("Sep/",i,"th","_adjust",sep=""))+
+           labs(title=paste("Top 10 cities in Sep/",i,"th"," after adjusting",sep=""))+
            ylab("freqency")+
            theme(axis.title.x = element_text(size = 10),
                  axis.text.y=element_text(size = 5))+

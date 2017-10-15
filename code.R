@@ -12,9 +12,7 @@ library(twitteR)
 #read in database
 
 library(curl)
-#zip file? how to do this?
-download.file("https://www.dropbox.com/sh/i9lccg7shxsscqe/AAD6DJ4Nuy9o6GyTLM4UiEzLa?dl=1","file.zip",mode="wb")
-unzip(zipfile="file.zip",overwrite = TRUE)
+
 
 download.file("https://www.dropbox.com/s/26fciujm2iw3umu/9-4.csv?dl=1","9-4.csv")
 download.file("https://www.dropbox.com/s/h58yrmd1cy0mwgb/9-5.csv?dl=1","9-5.csv")
@@ -37,8 +35,9 @@ for(i in c(4:8,29)){
  cHHs<-filter(cHHs,!is.na(location))
  write.csv(cHHs,paste("c9-",i,".csv",sep=""))
  assign(paste("cHH9",i,sep="_"),cHHs)
- 
+ rm(cHHs)
 }
+
 #raw data
 for (i in c(4:8,29)){
   dim<-get(paste("cHH9",i,sep="_"))
@@ -109,7 +108,18 @@ for(i in c(4:8,29)){
   city_ystate<-city_ystate[order(-city_ystate$number), ]
 #save the data
   write.csv(city_ystate,paste("citys_9_",i,".csv",sep=""))
-  
+  rm(city_ystate)
+  rm(city_ystate_1)
+  rm(city_ystate_2)
+  rm(city_ystate_3)
+  rm(city_ystate_4)
+  rm(temp)
+  rm(temp2)
+  rm(y_state)
+  rm(y_state_1)
+  rm(y_state_2)
+  rm(y_state_3)
+  rm(y_state_4)
 }
 #read in the dataset
 
@@ -220,21 +230,22 @@ for (i in 4:8){
   texas<-filter(location,state.x=="TX"|state.x=="LA")
   assign(paste("gb",b,sep=""),
          statemap +  geom_point(aes(x=longi, y = latti), data = texas,
-                                alpha=0.4, col="yellow",size = texas$freq_ad*200)+
+                                alpha=0.2, col="yellow",size = texas$freq_ad*200)+
                      geom_point(aes(x = longi, y = latti), data = texas, 
                                 alpha = 0.6, col = "red", size = 0.5) +
                      theme(axis.title.x = element_text(size = 5),
                            axis.text.x=element_text(size = 5),
                            axis.title.y = element_text(size = 5),
                            axis.text.y=element_text(size = 5),
-                           text = element_text(size = 10))+
+                           text = element_text(size = 10),
+                           plot.title=element_text(size=4))+
                      labs(title=paste("Sep/",i,"th",sep=""))+
                      scale_size_continuous(range = range(texas$number)))
                      
 }
-gb1
-multiplot(gb1, gb2, gb3, gb4,gb5, cols=2)
-gb4
+plot_grid(gb1, gb2, gb3, gb4,gb5, cols=2)
+ggsave("map_move.png",limitsize = FALSE)
+
 
 #the data before adjustment:
 #read in the dataset
@@ -263,19 +274,29 @@ for (i in c(4:8)){
   b<-b+1
   city_ystate<-get(paste("adcity_9",i,sep="_"))
   city_ystate$city<-factor(city_ystate$city, levels=unique(city_ystate$city))
-  assign(paste("e",b,sep=""),ggplot(head(city_ystate,20),aes(x=city,y=freq_ad,fill=state.x))+
+  assign(paste("e",b,sep=""),ggplot(head(city_ystate,10),aes(x=city,y=freq_ad,fill=state.x))+
            geom_bar(stat = "identity")+
-           labs(title=paste("Sep/",i,"th","_adjust",sep=""))+
+           labs(title=paste("September ",i,"th",sep=""))+
            ylab("freqency")+
-           theme(axis.title.x = element_text(size = 10),
-                 axis.text.y=element_text(size = 5))+
+           theme(axis.title.x = element_text(size = 5),
+                 axis.title.y=element_text(size=5),
+                 axis.text.y=element_text(size = 4),
+                 axis.text.x=element_text(size=4),
+                 plot.title=element_text(size=5),
+                 legend.key.size=unit(.045,"inches"),
+                 legend.key.height=unit(.05,"inches"),
+                 legend.key.width = unit(.05,"inches"),
+                 legend.title=element_text(size=4),
+                 legend.text=element_text(size=4))+
            coord_flip())
 }
 e1
-multiplot(e1,e2,e3,e4,e5,cols=2)
+plot_grid(e1,e2,e3,e4,e5, ncol = 2)
+ggsave("adjust_plot.png")
 
 
 #exclude Huston and Austin.
+library(cowplot)
 for (i in c(4:8)){
   city_ex<-get(paste("adcity_9_",i,sep=""))
   city_ex<-city_ex[-c(1:2), ]
@@ -305,10 +326,31 @@ for (i in 4:8){
   
 }
 gb1
-multiplot(gb1, gb2, gb3, gb4,gb5, cols=2)
-gb4
+plot_grid(gb1, gb2, gb3, gb4,gb5, cols=2)
+ggsave("map_move")
+
+
+
+
+
+
 #ten high cities based on different dates:
-#raw data
+#raw data before adjusting
+for (i in 4:8){
+  rawrow<-get(paste("citys_9_",i,sep=""))
+  rawrow<-rawrow$city[c(1:20)]
+  assign(paste("rawrow",i,sep=""),as.character(rawrow))
+}
+
+city<-c(rawrow4,rawrow5,rawrow6,rawrow7,rawrow8)
+col<-c("citys","date")
+row<-c("9-4","9-5","9-6","9-7","9-8")
+city_max<-matrix(city,byrow = FALSE,ncol=5)
+colnames(city_max)<-row
+write.csv(city_max,"rawcity.csv")
+raw_city_list<-read.csv("rawcity.csv")
+
+#raw data after adjusting
 for (i in 4:8){
   adrow<-get(paste("adcity_9_",i,sep=""))
   adrow<-adrow$city[c(1:20)]
@@ -321,9 +363,8 @@ col<-c("citys","date")
 row<-c("9-4","9-5","9-6","9-7","9-8")
 city_max<-matrix(city,byrow = FALSE,ncol=5)
 colnames(city_max)<-row
-write.csv(city_max,"city.csv")
-
-
+write.csv(city_max,"adcity.csv")
+adjust_city_list<-read.csv("adcity.csv")
 
 
 

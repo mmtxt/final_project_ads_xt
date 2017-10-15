@@ -1,7 +1,8 @@
 ---
 title: "Hurricane Harvey in America "
 author: xueting tao
-output: html_document
+output: pdf_document
+fontsize: 11pt
 ---
 
 ```{r setup, include=FALSE}
@@ -11,197 +12,119 @@ knitr::opts_chunk$set(echo = TRUE)
 # introduction
 
 Hurricane Harvey is an Atlantic hurricane that has attack America for several times in the past year. The most recent attack happened on August 13 when the National Hurricane center detect the hurricane on the western east of Africa. It hit United States on Texas and Louisiana on August 23rd. 
+
 In this project, I am going to use the information from twitter to identify possible the most serious hurt area and its possible moving route.
 
 
-#prepare for the data:
+# Methods:
 
+## 1.	Basic assumption:
+Before starting the analysis, there are few assumptions we need to check.
 
-1. start with scripting data from twitter. Since I am not familiar with python, I am going to use TwitterR package to help me. The detail instruction is here http://geoffjentry.hexdump.org/twitteR.pdf & https://github.com/geoffjentry/twitteR
+* __Assumption 1__  :The severity of the hurricane affects the times people tweets.
+* __Assumption 2__  :The location information in the location column the tweet original display is accurate and represent the people’s real location.
+* __Assumption 3__  :The missing and useless data is random. It is difficult to check this assumption, in order to do the analysis, I have to assume the assumption is right.
 
-2. Follow the instruction, first I need to create a Twitter Aplication:
+We will check these assumptions later in the result part to make sure this analysis is valid
 
-I create a new application with the name of xtao8 and get the API key, API secreat, Access token and Access secret.
+## 2.	Data extraction:
 
-3. Install twitterR. Since I would like to access Harvey and it mainly start on August 17th at night, I would like to start my search from August 25 and follow until 09/08/2017. 
-If the data set is too big, it would be difficult to analysis. So I would like to pull random sample several times and get useful information from them.
+The data comes from twitter from Sep 4th to Sep 8th by using the twitterR package[1]. For each day, I pooled the 10,000 tweets data from the API using the key word of "#HurricaneHarvey". For the date Sep 4th, I only pulled 4463 records since the overall twitter number is not enough. Then, by using the location information as the basic data source, I identify the path of hurricane and use the number of the same location occur as the severity of the hit.
 
-The code I used:
+Also, I poll the data again using the same method for Sep 29th. Still with the key word of "a" to aviod influence of hurricane and get the most usual pattern of usually tweets. This dataset is used as reference for correction later.
 
-```{r eval=FALSE}
-#getting the data: install twitterR since install.pacakge("twitterR")is not avialble
-#let me try another one
-install.packages(c("devtools", "rjson", "bit64", "httr"))
-#follow the instruction and restart R
-library(devtools)
-install_github("geoffjentry/twitteR")
+## 3.	Data cleaning:
 
-library(twitteR)
-setup_twitter_oauth("gLvw86UAzsVGG4lNoBTCttQjg", 
-                    "gbBf9OW1PMz2KXMZx9Wo3neKgXNSpvG3abgt3A3TxcBWxefmjm",
-                    "770639700839333888-foZXS5jtNXc7bWdpNnUR18Gb5fPQSp9",
-                    "n8lL1J7HlAhupOGdOVJFyLcNObxWtyxkffTGAnytyqjY1")
-#selection:
-1
-```
+The data cleaning process include several steps by using different kinds of packages[2][3][4].
+
+* __Step1 Get rid of useless information__	  Delete the data without “location” information(NAs) and create new dataset called cHHs.[2]
+
+* __Step2	Further cleaning the data__   This step includes separating the location information by city and state, showing all the characters in upper form and cleaning the spaces. Then, separate the dataset into two part, the one with useful state information and the one without useful state information. Abandon those without useful state information since most of it are typed and have nonsense information compared to those with state. When I doing this, the assumption is that the pattern are the same for those have state information and without state information.[3][4]
+
+* __Step 3 Extract specific State information__	  Since the hurricane hurt TX and LA, extract the time each city shows in TX and LA. Then, separate the dataset based on different dates. Also, in order to check the assumption we listed before, we need to extract other state information, too. We choose to extract MA and NA as reference states.
 
 
 
+## 4.	Data display:
 
-# getting and cleaning data:
+I am going to display the data by using bar plot and marking them on the plot. This process contains using of several packages, including ggplot2[5],ggmap[6] and mapproj[7]. The graphing process containing several different steps.
 
-1. First, I would like to try to pull 10000 sample from the twitter randomly and see how much data can be used.
-The day I can go back as early as possible is 9/5, so start from 9/5, I will get 5 days data and change it into data frame.
+### 4.1 Basic row data exploration
 
-```{r eval=FALSE}
-#data at 9-4
-sample_9_4<-searchTwitter('#HurricaneHarvey until:2017-9-5', n=10000)
-#data at 9-5
-sample_9_5<-searchTwitter('#HurricaneHarvey until:2017-9-6', n=10000)
-#data at 9-6
-sample_9_6<-searchTwitter('#HurricaneHarvey until:2017-9-7', n=10000)
-#data at 9-7
-sample_9_7<-searchTwitter('#HurricaneHarvey until:2017-9-8', n=10000)
-#data at 9-8
-sample_9_8<-searchTwitter('#HurricaneHarvey until:2017-9-9', n=10000)
-HH9_4<-twListToDF(sample_9_4)
-HH9_5<-twListToDF(sample_9_5)
-HH9_6<-twListToDF(sample_9_6)
-HH9_7<-twListToDF(sample_9_7)
-HH9_8<-twListToDF(sample_9_8)
-```
-clear the useless data
-```{r eval=FALSE}
-rm(sample_9_4)
-rm(sample_9_5)
-rm(sample_9_6)
-rm(sample_9_7)
-rm(sample_9_8)
+Graphing the first 20 cities that have the most frequency of showing for different dates using ggplot (geom_bar) and for the reference dates, too. Also, I use the cowplot package to display all the plots[8]
 
-```
+### 4.2 Exclude other confounders by using the reference data
 
-2. Delete lines without location information
+In order to exclude other confoundings that may have effect on twitter number, I extract the twitter date at Sep 29th. Since September 29th is the date almost a month away from the hit of hurricane Harvey, we can suppose that the twitter number in that date can represent usual twitter number. 
 
-```{r eval=FALSE}
-#read in the dataset
+I get the frequency of each city that shows up in the twitter for the top 40 cities each day from Sep 4th to Sep 8th and Sep 29th. And then, using the frequency in the hurricane days to subtract the frequency of none hurricane days and get the absolute differences.(since there are cities doesn't show in the reference data, we cannot use relative risk)
 
+After we get the absolute difference, that is the one indicator I would use for the following step, including showing them on the map.
+
+### 4.3	Using ggmap package and ggplot to graph the area on the map as to visualize the data.
+
+In this step, by using the ggmap and ggplot2 package, and the aboslute differences as indicator, I draw a map showing the abolute frequency about each city on the map to indicate the severity of the hit by the hurricane.
+
+### 5.	Statically comparing and assumption checking
+
+In order to check the assumptions, I use the below steps to do the checking.
+
+* __Assumption 1__  	By comparing the frequency of Maryland cities showed up and TX/LA cities showed up. Test the hypothesis of whether most hit area got the most tweets number.
+* __Assumption 2__    By comparing the frequency of hurricane dates and non-hurricane dates. Both assumption1 and assumption2 are done by the adjusting. If after adjusting, there are more TX/LA cities shows up than before adjusting, it would support the assumption
+
+# result:
+
+## 1.	The 20 cities that have the highest frequency:
+
+Before the adjusting, we can see that there are several non-hurricane hit state are in the top 20 cities that have the most tweets, but most of them are from hurricane hit area. The cities that are in the top 20 all the five days(from sep 4th to sep 8th) are Houston, Austin, Dallas, Lasvegas, Boston, Sanantonio, Fortworth, Corpuschristi, Neworleans. The 9 cities listed above, besides Las vegas and boston, other cities are from state of TX and LA.
+
+After adjusting, the cities that are in the top 20 all the five days(from sep 4th to sep 8th) are Houston, Austin, Katy, Corpuschristi, Arlington, and all the cities are from texas. This result check the assumption 1 and 2, showing that there is an inference of hurricane in the tweets number.
+The top 10 cities in different dates after adjusting are visulized as figure1.
+
+![The top 10 cities after adjusting](adjust_plot.png)
 
 
-#load tidytext and dplyr
-library(tidytext)
-library(dplyr)
 
-#select data that have location information
+##  2.	Basic map after adjusting comparing different dates:
 
-HH9_4$location[HH9_4$location==""]<-"NA"  
-HH9_4$location<-as.factor(HH9_4$location)
-cHH9_4<-filter(HH9_4,location!="NA")
+From figure2, Huston always the biggest proportion in the map. This is reasonable since Boston is the capital of the TX. It is difficult to tell whether Huston is the most hit city. However, as the time passed on, the trend are moving to the northwest of the state and then get back. This may show the pattern as the hurricane moves into the mainland.
+
+![The trands of Hurricane move](map_move.png)
+
+
+#Discussion.
+
+In this project, I predict the most hurt area by counting the number of tweets sending from each city. From the result, Huston and Austin get the most frequency of showing up and this is the same as what I found from the actual damage information from the internet. However, there are few limitations about this analysis.
+
+As for the result, although that the results are most similar to the actual serious hurt area, there is an exception. Dallas, which is also serious hurt, not shown itself in the map. In order to make sure why this happen, I check again the original dataset before the adjustment, and there it is, always in the best 10 of the city list. So, what might happened is, it shows up in high frequency on date 9/29, too. And after the subtraction, it disappear. This might happen by on the specific day of 9/29, people in Dallas accidently tweet a lot by some reason.
+However, by using the twitter, it can give a basic map of what is happening across the country, but not that precisely. 
+
+
+#Citations:
+
+1.  Jeff Gentry (NA). twitteR: R Based Twitter Client. R package version 1.1.9.
+   http://lists.hexdump.org/listinfo.cgi/twitter-users-hexdump.org
+
+
+2.  Hadley Wickham, Romain Francois, Lionel Henry and Kirill Müller (2017). dplyr: A Grammar of Data Manipulation. R
+  package version 0.7.4. https://CRAN.R-project.org/package=dplyr
   
+3.  Hadley Wickham and Lionel Henry (2017). tidyr: Easily Tidy Data with 'spread()' and 'gather()' Functions. R package
+  version 0.7.0. https://CRAN.R-project.org/package=tidyr
+  
+4.  Hadley Wickham (2017). stringr: Simple, Consistent Wrappers for Common String Operations. R package version 1.2.0.
+  https://CRAN.R-project.org/package=stringr 
 
-HH9_5$location[HH9_5$location==""]<-"NA"  
-HH9_5$location<-as.factor(HH9_5$location)
-cHH9_5<-filter(HH9_5,location!="NA")
+5.  H. Wickham. ggplot2: Elegant Graphics for Data Analysis. Springer-Verlag New York, 2009.
 
+6.  D. Kahle and H. Wickham. ggmap: Spatial Visualization with ggplot2. The R Journal, 5(1), 144-161. URL
+  http://journal.r-project.org/archive/2013-1/kahle-wickham.pdf
 
-HH9_6$location[HH9_6$location==""]<-"NA"  
-HH9_6$location<-as.factor(HH9_6$location)
-cHH9_6<-filter(HH9_6,location!="NA")
+7.  Doug McIlroy. Packaged for R by Ray Brownrigg, Thomas P Minka and transition to Plan 9 codebase by Roger Bivand.
+  (2017). mapproj: Map Projections. R package version 1.2-5. https://CRAN.R-project.org/package=mapproj
+  
+8. Claus O. Wilke (2017). cowplot: Streamlined Plot Theme and Plot Annotations for 'ggplot2'. R
+  package version 0.8.0. https://CRAN.R-project.org/package=cowplot
 
-
-HH9_7$location[HH9_7$location==""]<-"NA"  
-HH9_7$location<-as.factor(HH9_7$location)
-cHH9_7<-filter(HH9_7,location!="NA")
-
-
-HH9_8$location[HH9_8$location==""]<-"NA"  
-HH9_8$location<-as.factor(HH9_8$location)
-cHH9_8<-filter(HH9_8,location!="NA")
-
-```
-#basic EDA report:
-```{r echo=FALSE}
-dim<-read.csv("dim.csv")
-colnames(dim)[1]<-"dates"
-dim
-```
-
-
-
-
-
-#Basic cleaning of the data(9/4 as an example)
-
-
-```{r eval=FALSE}
-
-cHH9_4<-separate(cHH9_4,location,c("city","state"),sep=",")
-
-cHH9_4$state<-toupper(cHH9_4$state)
-cHH9_4$city<-toupper(cHH9_4$city)
-
-cHH9_4$state<-as.factor(str_replace_all(cHH9_4$state,pattern=" ",replacement=""))
-cHH9_4$city<-as.factor(str_replace_all(cHH9_4$city,pattern=" ",replacement=""))
-
-no_state<-filter(cHH9_4,state=="USA"
-                 |is.na(state))
-y_state<-filter(cHH9_4,state!="USA"
-                 &!is.na(state))
-```
-
-
-# cleaning_continue
-
-```{r eval=FALSE}
-
-#remain those have Tx
-
-state_num<-summary(y_state$state,maxsum = 500)
-
-y_state<-filter(y_state,state=="TX"|state=="TEXAS")
-city_c<-summary(y_state$city,maxsum = 500)
-name_city<-names(city_c)
-
-#change summary of state and city into data frame
-
-city_ystate<-data.frame(city_c)
-city_ystate$city<-as.factor(name_city)
-
-#clear nonsense data$rename
-city_ystate<-filter(city_ystate,city_c>0)
-vector<-c("number","city")
-citylist<-city_ystate$city
-
-colnames(city_ystate)<-vector
-rownames(city_ystate)<-citylist
-
-#for those without state
-#use citylist to find same city and add to count
-
-city_nstate<-no_state[ ,"city"]
-city_nstate<-
-
-
-#bind city together:
-city_total<-city_ystate+city_nstate
-
-
-```
-
-
-# match city to geographic points
-
-
-# Put location information into GIS
-
-# Use IDW tool to draw the difference over time on map.
-
-
-
-
-
-# Data source:
-
-* [twitter](https://twitter.com/)
-* [twitterR package](http://geoffjentry.hexdump.org/twitteR.pdf)
 
 
