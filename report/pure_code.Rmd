@@ -80,7 +80,7 @@ download.file("https://www.dropbox.com/s/h58yrmd1cy0mwgb/9-5.csv?dl=1","9-5.csv"
 download.file("https://www.dropbox.com/s/vzselkdqr597ykk/9-6.csv?dl=1","9-6.csv")
 download.file("https://www.dropbox.com/s/l4i5ufbxemu241b/9-7.csv?dl=1","9-7.csv")
 download.file("https://www.dropbox.com/s/fb2hv24etxytxgl/9-8.csv?dl=1","9-8.csv")
-download.file("https://www.dropbox.com/s/xqb3bqnmv87olh0/9-29.csv?dl=1","9-9.csv")
+download.file("https://www.dropbox.com/s/xqb3bqnmv87olh0/9-29.csv?dl=1","9-29.csv")
 
 #read in the data:
 for(i in c(4:8,29)){
@@ -131,9 +131,8 @@ for(i in c(4:8,29)){
   temp$state<-as.factor(str_replace_all(temp$state,pattern=" ",replacement=""))
   temp$city<-as.factor(str_replace_all(temp$city,pattern=" ",replacement=""))
   assign(paste("cHH9",i,sep="_"),temp)
+  write.csv(temp,paste("c9-",i,".csv",sep=""))
 }
-
-
 
 
 # I calculated the time each city shows in TX and LA, both in the data that containing a state information and without state information. Add state information to the final dataframe
@@ -310,7 +309,6 @@ for (i in c(4:8)){
                  legend.text=element_text(size=4))+
            coord_flip())
 }
-e1
 plot_grid(e1,e2,e3,e4,e5, ncol = 2)
 ggsave("adjust_plot.png")
 

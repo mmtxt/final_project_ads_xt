@@ -9,16 +9,16 @@ fontsize: 11pt
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# introduction
+# 1 introduction
 
 Hurricane Harvey is an Atlantic hurricane that has attack America for several times in the past year. The most recent attack happened on August 13 when the National Hurricane center detect the hurricane on the western east of Africa. It hit United States on Texas and Louisiana on August 23rd. 
 
 In this project, I am going to use the information from twitter to identify possible the most serious hurt area and its possible moving route.
 
 
-# Methods:
+# 2 Methods:
 
-## 1.	Basic assumption:
+## 2.1.	Basic assumption:
 Before starting the analysis, there are few assumptions we need to check.
 
 * __Assumption 1__  :The severity of the hurricane affects the times people tweets.
@@ -27,13 +27,13 @@ Before starting the analysis, there are few assumptions we need to check.
 
 We will check these assumptions later in the result part to make sure this analysis is valid
 
-## 2.	Data extraction:
+## 2.2.	Data extraction:
 
 The data comes from twitter from Sep 4th to Sep 8th by using the twitterR package[1]. For each day, I pooled the 10,000 tweets data from the API using the key word of "#HurricaneHarvey". For the date Sep 4th, I only pulled 4463 records since the overall twitter number is not enough. Then, by using the location information as the basic data source, I identify the path of hurricane and use the number of the same location occur as the severity of the hit.
 
 Also, I poll the data again using the same method for Sep 29th. Still with the key word of "a" to aviod influence of hurricane and get the most usual pattern of usually tweets. This dataset is used as reference for correction later.
 
-## 3.	Data cleaning:
+## 2.3.	Data cleaning:
 
 The data cleaning process include several steps by using different kinds of packages[2][3][4].
 
@@ -45,15 +45,16 @@ The data cleaning process include several steps by using different kinds of pack
 
 
 
-## 4.	Data display:
+## 2.4.	Data display and modeling:
 
 I am going to display the data by using bar plot and marking them on the plot. This process contains using of several packages, including ggplot2[5],ggmap[6] and mapproj[7]. The graphing process containing several different steps.
 
-### 4.1 Basic row data exploration
+### 2.4.1 Basic row data exploration
 
 Graphing the first 20 cities that have the most frequency of showing for different dates using ggplot (geom_bar) and for the reference dates, too. Also, I use the cowplot package to display all the plots[8]
 
-### 4.2 Exclude other confounders by using the reference data
+
+### 2.4.2 Exclude other confounders by using the reference data
 
 In order to exclude other confoundings that may have effect on twitter number, I extract the twitter date at Sep 29th. Since September 29th is the date almost a month away from the hit of hurricane Harvey, we can suppose that the twitter number in that date can represent usual twitter number. 
 
@@ -61,22 +62,33 @@ I get the frequency of each city that shows up in the twitter for the top 40 cit
 
 After we get the absolute difference, that is the one indicator I would use for the following step, including showing them on the map.
 
-### 4.3	Using ggmap package and ggplot to graph the area on the map as to visualize the data.
+### 2.4.3 modeling the data
+
+
+In order to estimate the probability of each city occurs in tweets on different dates, I use the following model to access the Outcome
+
+$$P(Y_{i}=1)=X_{i1}\beta_{i1}+X_{i2}\beta_{i2}+X_{i3}\beta_{i3}+X_{i4}\beta_{i4}+X_{i5}\beta_{i5}+X_{i6}\beta_{i6} $$
+
+Xs are all binary varibles(0/1) indicating different dates in the data set. By doing this, I treated the dates as categorical varible and write them up in the dummy form. Yis are the cities that shows up in the data, each city represent a different Y. The model is using the analysis the probability of each city shows up in different dates. Thus, the coeffcient would be the probability of each city shows.
+
+
+### 2.4.4	Using ggmap package and ggplot to graph the area on the map as to visualize the data.
 
 In this step, by using the ggmap and ggplot2 package, and the aboslute differences as indicator, I draw a map showing the abolute frequency about each city on the map to indicate the severity of the hit by the hurricane.
 
-### 5.	Statically comparing and assumption checking
+## 2.5.	Assumption checking
+
 
 In order to check the assumptions, I use the below steps to do the checking.
 
 * __Assumption 1__  	By comparing the frequency of Maryland cities showed up and TX/LA cities showed up. Test the hypothesis of whether most hit area got the most tweets number.
 * __Assumption 2__    By comparing the frequency of hurricane dates and non-hurricane dates. Both assumption1 and assumption2 are done by the adjusting. If after adjusting, there are more TX/LA cities shows up than before adjusting, it would support the assumption
 
-# result:
+# 3. result:
 
-## 1.	The 20 cities that have the highest frequency:
+## 3.1.	The 20 cities that have the highest frequency:
 
-Before the adjusting, we can see that there are several non-hurricane hit state are in the top 20 cities that have the most tweets, but most of them are from hurricane hit area. The cities that are in the top 20 all the five days(from sep 4th to sep 8th) are Houston, Austin, Dallas, Lasvegas, Boston, Sanantonio, Fortworth, Corpuschristi, Neworleans. The 9 cities listed above, besides Las vegas and boston, other cities are from state of TX and LA.
+Before the adjusting, we can see that there are several non-hurricane hit state are in the top 20 cities that have the most tweets, but most of them are from hurricane hit area. The cities that are in the top 20 all the five days(form sep 4th to sep 8th)($\beta \neq 0$) are Houston, Austin, Dallas, Lasvegas, Boston, Sanantonio, Fortworth, Corpuschristi, Neworleans. The 9 cities listed above, besides Las vegas and boston, other cities are from state of TX and LA. Since the coefficents are probabilities, they are showing as frequency in the citys_9_i datasets. I choose the top 20 cities based on the frequencies.
 
 After adjusting, the cities that are in the top 20 all the five days(from sep 4th to sep 8th) are Houston, Austin, Katy, Corpuschristi, Arlington, and all the cities are from texas. This result check the assumption 1 and 2, showing that there is an inference of hurricane in the tweets number.
 The top 10 cities in different dates after adjusting are visulized as figure1.
@@ -85,7 +97,7 @@ The top 10 cities in different dates after adjusting are visulized as figure1.
 
 
 
-##  2.	Basic map after adjusting comparing different dates:
+##  3.2.	Basic map after adjusting comparing different dates:
 
 From figure2, Huston always the biggest proportion in the map. This is reasonable since Boston is the capital of the TX. It is difficult to tell whether Huston is the most hit city. However, as the time passed on, the trend are moving to the northwest of the state and then get back. This may show the pattern as the hurricane moves into the mainland.
 
