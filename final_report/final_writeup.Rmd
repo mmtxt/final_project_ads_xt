@@ -1,5 +1,5 @@
 ---
-title: "Hurricane Harvey in America "
+title: "Using twitter information to indentify the Harvey Hurricane pathway "
 author: xueting tao
 output: pdf_document
 fontsize: 11pt
@@ -13,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Hurricane Harvey is an Atlantic hurricane that has attack America for several times in the past year. The most recent attack happened on August 13 when the National Hurricane center detect the hurricane on the western east of Africa. It hit United States on Texas and Louisiana on August 23rd. 
 
-In this project, I am going to use the information from twitter to identify possible the most serious hurt area and its possible moving route.
+The main purpose of this project is to use social commuication media to access some key information about his hurricane attack. I am going to use the information from twitter to identify possible the most serious hurt area and its possible moving route.
 
 
 # 2 Methods:
@@ -29,7 +29,7 @@ We will check these assumptions later in the result part to make sure this analy
 
 ## 2.2.	Data extraction:
 
-The data comes from twitter from Sep 4th to Sep 8th by using the twitterR package[1]. For each day, I pooled the 10,000 tweets data from the API using the key word of "#HurricaneHarvey". For the date Sep 4th, I only pulled 4463 records since the overall twitter number is not enough. Then, by using the location information as the basic data source, I identify the path of hurricane and use the number of the same location occur as the severity of the hit.
+The data comes from twitter from Sep 4th to Sep 8th by using the key word"#Hurricaneharvey"[1]. The detail information is in the part one "getting the data" in the code.rmd. For each day, I pooled the 10,000 tweets data from the API using the key word of "#HurricaneHarvey". For the date Sep 4th, I only pulled 4463 records since the overall twitter number is not enough. Then, by using the location information as the basic data source, I identify the path of hurricane and use the number of the same location occur as the severity of the hit.
 
 Also, I poll the data again using the same method for Sep 29th. Still with the key word of "a" to aviod influence of hurricane and get the most usual pattern of usually tweets. This dataset is used as reference for correction later.
 
@@ -86,7 +86,7 @@ In order to check the assumptions, I use the below steps to do the checking.
 
 # 3. result:
 
-## 3.1.	The 20 cities that have the highest frequency:
+## 3.1 Most seriesly hurt area:
 
 Before the adjusting, we can see that there are several non-hurricane hit state are in the top 20 cities that have the most tweets, but most of them are from hurricane hit area. The cities that are in the top 20 all the five days(form sep 4th to sep 8th)($\beta \neq 0$) are Houston, Austin, Dallas, Lasvegas, Boston, Sanantonio, Fortworth, Corpuschristi, Neworleans. The 9 cities listed above, besides Las vegas and boston, other cities are from state of TX and LA. Since the coefficents are probabilities, they are showing as frequency in the citys_9_i datasets. I choose the top 20 cities based on the frequencies.
 
@@ -97,14 +97,14 @@ The top 10 cities in different dates after adjusting are visulized as figure1.
 
 
 
-##  3.2.	Basic map after adjusting comparing different dates:
+##  3.2.	Possible route of Hurricane moving:
 
 From figure2, Huston always the biggest proportion in the map. This is reasonable since Boston is the capital of the TX. It is difficult to tell whether Huston is the most hit city. However, as the time passed on, the trend are moving to the northwest of the state and then get back. This may show the pattern as the hurricane moves into the mainland.
 
 ![The trands of Hurricane move](map_move.png)
 
 
-#Discussion.
+#  4. Conclusion.
 
 In this project, I predict the most hurt area by counting the number of tweets sending from each city. From the result, Huston and Austin get the most frequency of showing up and this is the same as what I found from the actual damage information from the internet. However, there are few limitations about this analysis.
 
@@ -112,7 +112,7 @@ As for the result, although that the results are most similar to the actual seri
 However, by using the twitter, it can give a basic map of what is happening across the country, but not that precisely. 
 
 
-#Citations:
+#  5. Citations:
 
 1.  Jeff Gentry (NA). twitteR: R Based Twitter Client. R package version 1.1.9.
    http://lists.hexdump.org/listinfo.cgi/twitter-users-hexdump.org
