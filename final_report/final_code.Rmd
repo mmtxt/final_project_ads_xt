@@ -8,6 +8,28 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+```{r}
+##checking and installing the packages
+packages<-c("stringr", "dplyr","ggplot2","rebus", "tidyr", "ggmap", "mapproj", "cowplot","twitteR")
+
+for (i in packages){
+  if(!require(i,character.only = T,quietly=T,warn.conflicts = F)){
+    install.packages(i, repos = "http://cran.us.r-project.org")
+  }
+  require(i,character.only = T,quietly=T,warn.conflicts = F)
+}
+#load useful package
+library(dplyr)
+library(stringr)
+library(rebus)
+library(tidyr)
+library(ggplot2)
+library(ggmap)
+library(mapproj)
+library(twitteR)
+library(cowplot)
+
+```
 Getting the data
 ```{r eval=FALSE}
 #just for reference use
@@ -26,15 +48,6 @@ setup_twitter_oauth("API key",
 #selection:
 1
 
-#load useful package
-library(dplyr)
-library(stringr)
-library(rebus)
-library(tidyr)
-library(ggplot2)
-library(ggmap)
-library(mapproj)
-library(twitteR)
 
 #start getting the data
 #data at 9-4
@@ -61,16 +74,7 @@ HH9_29<-twListToDF(HH9_29)
 Data cleaning
 
 ```{r }
-#load useful package
-library(dplyr)
-library(stringr)
-library(rebus)
-library(tidyr)
-library(ggplot2)
-library(ggmap)
-library(mapproj)
-library(twitteR)
-library(cowplot)
+
 
 #In order to make sure about reproduction, let's just use my data
 #download the data from the dropbox
